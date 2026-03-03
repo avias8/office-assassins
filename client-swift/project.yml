@@ -1,0 +1,119 @@
+name: OfficeAssassins
+options:
+  bundleIdPrefix: ca.avivarma
+  deploymentTarget:
+    macOS: "26.0"
+    iOS: "26.0"
+    tvOS: "26.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: false
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: false
+
+packages:
+  SpacetimeDB:
+    url: https://github.com/avias8/spacetimedb-swift.git
+    from: "0.21.0"
+
+targets:
+  OfficeAssassins:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/OfficeAssassinsClient
+        excludes:
+          - "**/*.entitlements"
+    resources:
+      - path: Sources/OfficeAssassinsClient/Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ca.avivarma.officeassassins
+        PRODUCT_NAME: "Office Assassins"
+        INFOPLIST_FILE: SupportingFiles/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements
+        CODE_SIGN_STYLE: Automatic
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        SWIFT_VERSION: "6.0"
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+        COMBINE_HIDPI_IMAGES: true
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: SpacetimeDB
+        product: SpacetimeDB
+      - sdk: GameController.framework
+    entitlements:
+      path: Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements
+    attributes:
+      SystemCapabilities:
+        com.apple.GameCenter:
+          enabled: 1
+
+  OfficeAssassins-iOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/OfficeAssassinsClient
+        excludes:
+          - "**/*.entitlements"
+    resources:
+      - path: Sources/OfficeAssassinsClient/Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ca.avivarma.officeassassins
+        PRODUCT_NAME: "Office Assassins"
+        INFOPLIST_FILE: SupportingFiles/Info-iOS.plist
+        CODE_SIGN_ENTITLEMENTS: Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements
+        CODE_SIGN_STYLE: Automatic
+        IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: false
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: SpacetimeDB
+        product: SpacetimeDB
+      - sdk: GameController.framework
+    entitlements:
+      path: Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements
+    attributes:
+      SystemCapabilities:
+        com.apple.GameCenter:
+          enabled: 1
+
+  OfficeAssassins-tvOS:
+    type: application
+    platform: tvOS
+    sources:
+      - path: Sources/OfficeAssassinsClient
+        excludes:
+          - "**/*.entitlements"
+    resources:
+      - path: Sources/OfficeAssassinsClient/Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ca.avivarma.officeassassins
+        PRODUCT_NAME: "Office Assassins"
+        INFOPLIST_FILE: SupportingFiles/Info-tvOS.plist
+        CODE_SIGN_ENTITLEMENTS: Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements
+        CODE_SIGN_STYLE: Automatic
+        TVOS_DEPLOYMENT_TARGET: "26.0"
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "3"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: SpacetimeDB
+        product: SpacetimeDB
+      - sdk: GameController.framework
+    entitlements:
+      path: Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements
+    attributes:
+      SystemCapabilities:
+        com.apple.GameCenter:
+          enabled: 1

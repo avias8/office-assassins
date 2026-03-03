@@ -24,159 +24,93 @@ struct HudStatChip: View {
     let tint: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(label)
-                .font(.custom("AvenirNextCondensed-DemiBold", size: 10))
-                .foregroundStyle(tint.opacity(0.72))
+        VStack(alignment: .center, spacing: 2) {
             Text(value)
-                .font(.custom("AvenirNextCondensed-Heavy", size: 14))
+                .font(.system(size: 20, weight: .black, design: .rounded).monospacedDigit())
                 .foregroundStyle(tint)
+            Text(label.uppercased())
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .foregroundStyle(tint.opacity(0.65))
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(tint.opacity(0.14))
-        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(tint.opacity(0.42), lineWidth: 1.5))
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
 struct HudHealthMeter: View {
     let health: UInt32
 
-    private var clampedHealth: Double {
-        min(100, max(0, Double(health)))
-    }
-
-    private var healthFraction: Double {
-        clampedHealth / 100
-    }
-
-    private var healthColor: Color {
-        Color(hue: 0.33 * healthFraction, saturation: 0.82, brightness: 0.95)
-    }
+    private var fraction: Double { min(1, max(0, Double(health) / 100)) }
+    private var color: Color { Color(hue: 0.33 * fraction, saturation: 0.82, brightness: 0.95) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Text("HP")
-                    .font(.custom("AvenirNextCondensed-Heavy", size: 10))
-                    .foregroundStyle(healthColor.opacity(0.80))
-                Text("\(Int(clampedHealth))/100")
-                    .font(.custom("AvenirNextCondensed-Heavy", size: 12))
-                    .foregroundStyle(healthColor)
-            }
-
+        HStack(spacing: 10) {
+            Text("\(health)")
+                .font(.system(size: 24, weight: .black, design: .rounded).monospacedDigit())
+                .foregroundStyle(color)
+                .frame(minWidth: 36, alignment: .trailing)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Color.black.opacity(0.35))
-                    Rectangle()
-                        .fill(healthColor)
-                        .frame(width: max(4, geo.size.width * healthFraction))
+                    Capsule().fill(Color.black.opacity(0.35))
+                    Capsule()
+                        .fill(LinearGradient(
+                            colors: [color.opacity(0.8), color],
+                            startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(6, geo.size.width * fraction))
                 }
             }
-            .frame(height: 7)
-            .overlay(Rectangle().strokeBorder(healthColor.opacity(0.50), lineWidth: 1))
+            .frame(height: 12)
+            .clipShape(Capsule())
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .background(Color.white.opacity(0.06))
-        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Color(white: 0.28), lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
 struct EventFeedView: View {
     let events: [GameEventEntry]
     var title: String = "Event Feed"
-    var maxVisible: Int = 8
+    var maxVisible: Int = 4
     var padded: Bool = false
-    private let eventLifetime: TimeInterval = 18
-    private let fadeDuration: TimeInterval = 10
-    private let popInDuration: TimeInterval = 0.35
-
-    struct RenderedEvent: Identifiable {
-        let entry: GameEventEntry
-        let opacity: Double
-        let scale: CGFloat
-        let offsetY: CGFloat
-        var id: Int { entry.id }
+    
+    private var visibleEvents: [GameEventEntry] {
+        Array(events.suffix(maxVisible).reversed())
     }
 
-    private func renderedEvents(at now: Date) -> [RenderedEvent] {
-        Array(events.suffix(maxVisible).reversed()).compactMap { event in
-            let age = now.timeIntervalSince(event.timestamp)
-            guard age >= 0, age < eventLifetime else { return nil }
+    private func fillColor(for event: GameEventEntry) -> Color {
+        event.kind == .combat ? SurvivorsTheme.danger.opacity(0.60) : Color.black.opacity(0.52)
+    }
 
-            let fadeStart = eventLifetime - fadeDuration
-            let opacity: Double
-            if age <= fadeStart {
-                opacity = 1.0
-            } else {
-                opacity = max(0, (eventLifetime - age) / max(0.001, fadeDuration))
-            }
+    private func strokeColor(for event: GameEventEntry) -> Color {
+        event.kind == .combat ? SurvivorsTheme.danger.opacity(0.4) : Color.white.opacity(0.12)
+    }
 
-            let popProgress = min(1, max(0, age / popInDuration))
-            let popEase = 1 - pow(1 - popProgress, 3)
-            let scale = 0.94 + (0.06 * popEase)
-            let offsetY = 8 * (1 - popEase)
-
-            return RenderedEvent(
-                entry: event,
-                opacity: opacity,
-                scale: scale,
-                offsetY: offsetY
+    @ViewBuilder
+    private func eventRow(_ event: GameEventEntry) -> some View {
+        Text(event.text.uppercased())
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(fillColor(for: event))
+                    .overlay(
+                        Capsule().strokeBorder(strokeColor(for: event), lineWidth: 1)
+                    )
             )
-        }
-    }
-
-    private var listHeight: CGFloat {
-        // Stable height prevents panel-edge jitter as items appear/disappear.
-        CGFloat(maxVisible) * 18 + 4
+            .transition(
+                .asymmetric(
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                    removal: .opacity
+                )
+            )
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.25)) { timeline in
-            let visible = renderedEvents(at: timeline.date)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(title)
-                    .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
-                    .foregroundStyle(SurvivorsTheme.textMuted)
-                    .shadow(color: .black, radius: 2, x: 1, y: 1)
-
-                ZStack(alignment: .topLeading) {
-                    if visible.isEmpty {
-                        Text("No recent events")
-                            .font(.custom("AvenirNextCondensed-Medium", size: 11))
-                            .foregroundStyle(Color(white: 0.35))
-                            .shadow(color: .black.opacity(0.8), radius: 1, x: 1, y: 1)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(visible) { item in
-                            HStack(spacing: 6) {
-                                Text(item.entry.kind == .combat ? "►" : "·")
-                                    .font(.custom("AvenirNextCondensed-Heavy", size: 10))
-                                    .foregroundStyle(item.entry.kind == .combat ? SurvivorsTheme.accentSecondary : SurvivorsTheme.accent)
-                                    .shadow(color: .black.opacity(0.8), radius: 1, x: 0, y: 1)
-                                Text(item.entry.text)
-                                    .font(.custom("AvenirNextCondensed-Medium", size: 11))
-                                    .foregroundStyle(.white)
-                                    .lineLimit(1)
-                                    .shadow(color: .black, radius: 1.5, x: 1, y: 1)
-                                Spacer(minLength: 0)
-                            }
-                            .opacity(item.opacity)
-                            .scaleEffect(item.scale, anchor: .leading)
-                            .offset(y: item.offsetY)
-                        }
-                    }
-                }
-                .frame(height: listHeight, alignment: .topLeading)
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(visibleEvents) { event in
+                eventRow(event)
             }
-            .animation(.spring(response: 0.28, dampingFraction: 0.86), value: visible.map(\.id))
-            .padding(padded ? 10 : 0)
         }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: events.map(\.id))
     }
 }
 

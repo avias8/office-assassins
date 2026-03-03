@@ -6,6 +6,14 @@ import SpacetimeDB
 struct LobbyView: View {
     let vm: OfficeAssassinsViewModel
     let onAction: (ExitAction) -> Void
+    #if os(tvOS)
+    private enum TVFocusTarget: Hashable {
+        case readyToggle
+        case launchMatch
+        case leaveLobby
+    }
+    @FocusState private var tvFocus: TVFocusTarget?
+    #endif
     
     var currentLobby: Lobby? {
         vm.myLobby
@@ -160,8 +168,7 @@ struct LobbyView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Button(action: {
-                        SoundEffects.shared.play(.buttonPress)
-                        ToggleReady.invoke()
+                        toggleReady()
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: myPlayerIsReady ? "xmark" : "checkmark")
@@ -172,10 +179,12 @@ struct LobbyView: View {
                     .buttonStyle(PixelButtonStyle(filled: !myPlayerIsReady, danger: myPlayerIsReady))
                     .controlSize(.large)
                     .disabled(!vm.isConnected || !vm.hasJoined)
+                    #if os(tvOS)
+                    .focused($tvFocus, equals: .readyToggle)
+                    #endif
 
                     Button(action: {
-                        SoundEffects.shared.play(.enterArena)
-                        StartMatch.invoke()
+                        launchMatch()
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "play.fill")
@@ -186,16 +195,21 @@ struct LobbyView: View {
                     .buttonStyle(PixelButtonStyle(filled: true, accentColor: Color(red: 0.15, green: 0.75, blue: 0.30)))
                     .controlSize(.large)
                     .disabled(!vm.isConnected || !vm.hasJoined)
+                    #if os(tvOS)
+                    .focused($tvFocus, equals: .launchMatch)
+                    #endif
 
                     Button(role: .destructive, action: {
-                        SoundEffects.shared.play(.buttonPress)
-                        LeaveLobby.invoke()
+                        leaveLobby()
                     }) {
                         Text("Leave Lobby")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PixelButtonStyle(danger: true))
                     .controlSize(.large)
+                    #if os(tvOS)
+                    .focused($tvFocus, equals: .leaveLobby)
+                    #endif
                 }
             }
             .frame(width: 400)
@@ -203,6 +217,31 @@ struct LobbyView: View {
             .padding(.vertical, 24)
             .pixelPanel()
             .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.12), radius: 16, x: 0, y: 6)
+            #if os(tvOS)
+            .focusSection()
+            #endif
         }
+        #if os(tvOS)
+        .onAppear { DispatchQueue.main.async { tvFocus = .readyToggle } }
+        .onPlayPauseCommand { toggleReady() }
+        .onExitCommand { leaveLobby() }
+        #endif
+    }
+
+    private func toggleReady() {
+        guard vm.isConnected, vm.hasJoined else { return }
+        SoundEffects.shared.play(.buttonPress)
+        ToggleReady.invoke()
+    }
+
+    private func launchMatch() {
+        guard vm.isConnected, vm.hasJoined else { return }
+        SoundEffects.shared.play(.enterArena)
+        StartMatch.invoke()
+    }
+
+    private func leaveLobby() {
+        SoundEffects.shared.play(.buttonPress)
+        LeaveLobby.invoke()
     }
 }

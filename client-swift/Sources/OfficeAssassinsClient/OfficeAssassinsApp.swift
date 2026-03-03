@@ -40,9 +40,13 @@ struct OfficeAssassinsApp: App {
     var body: some Scene {
         WindowGroup("Office Assassins") {
             RootView()
+                #if os(macOS)
                 .frame(minWidth: 700, minHeight: 560)
+                #endif
         }
+        #if canImport(AppKit)
         .windowStyle(.titleBar)
+        #endif
     }
 }
 
@@ -64,6 +68,7 @@ private enum Screen {
 final class RootViewModel {
     let audio = MusicPlayer()
     var gameVM = OfficeAssassinsViewModel()
+    let gameCenter = GameCenterManager()
 }
 
 // MARK: - Root view
@@ -72,6 +77,7 @@ struct RootView: View {
     @State private var screen: Screen = .title
     @State private var playerName: String = "Player \(Int.random(in: 1...99))"
     @State private var titleOpacity = 0.0
+    @State private var appliedGCName = false
     
     @State private var vm = RootViewModel()
 
@@ -86,6 +92,7 @@ struct RootView: View {
                 TitleView(
                     titleOpacity: titleOpacity,
                     vm: vm.gameVM,
+                    gc: vm.gameCenter,
                     onBrowseLobbies: {
                         vm.gameVM.initialName = playerName
                         vm.gameVM.clearPendingQuickJoinFromTitle()
@@ -96,6 +103,7 @@ struct RootView: View {
                         vm.gameVM.initialName = playerName
                         vm.gameVM.scheduleQuickJoinFromTitle()
                         vm.gameVM.start()
+                        withAnimation(.easeIn(duration: 0.35)) { screen = .lobbyBrowser }
                     },
                     playerName: $playerName,
                     selectedEnvironment: $vm.gameVM.environment
@@ -138,6 +146,7 @@ struct RootView: View {
                 OfficeAssassinsView(
                     isBackground: false,
                     isMuted: vm.audio.isMuted,
+                    profileCGImage: vm.gameCenter.profileCGImage,
                     injectedVM: vm.gameVM,
                     onMuteToggle: { vm.audio.toggleMute() }
                 ) { action in
@@ -163,12 +172,25 @@ struct RootView: View {
         .animation(.easeInOut(duration: 0.5), value: screen)
         .onAppear {
             vm.audio.playTitle()
+            vm.gameCenter.authenticate()
             withAnimation(.easeIn(duration: 1.4)) { titleOpacity = 1.0 }
+        }
+        .onChange(of: vm.gameCenter.displayName) { _, gcName in
+            if let gcName, !gcName.isEmpty, !appliedGCName {
+                playerName = gcName
+                vm.gameVM.initialName = gcName
+                if vm.gameVM.hasJoined {
+                    vm.gameVM.renameCurrentPlayer(to: gcName)
+                }
+                appliedGCName = true
+            }
         }
         .onChange(of: screen) { _, newScreen in
             // Any screen outside active play uses title music.
             if newScreen != .playing {
                 vm.audio.switchToTitleMusic()
+            } else {
+                vm.gameCenter.refreshProfilePhoto()
             }
         }
         .onChange(of: vm.gameVM.activeLobbyId) { _, newLobbyId in

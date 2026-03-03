@@ -1,0 +1,951 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0002CBBE8DB959B290D5D84C /* SpaceTimeDB Survivors.m4a in Resources */ = {isa = PBXBuildFile; fileRef = A75ABBF927754C3AC77E44C4 /* SpaceTimeDB Survivors.m4a */; };
+		0051AC5C509D9DAAD318F997 /* SpaceTimeDB Survivors.m4a in Resources */ = {isa = PBXBuildFile; fileRef = A75ABBF927754C3AC77E44C4 /* SpaceTimeDB Survivors.m4a */; };
+		00660A5B90BD169B46A470E9 /* Lobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1359D754627968B061455194 /* Lobby.swift */; };
+		038EF1EF4109C306EF7264BC /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F5AA25195CB536D9922491 /* TitleView.swift */; };
+		053FDCFE282922AB0EB6BD6F /* OfficeAssassinsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61981F1C0E30197B7764B1F /* OfficeAssassinsApp.swift */; };
+		057007672D898BD0537E4BB7 /* BotAttack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC0824C3AC65D77A19BA76 /* BotAttack.swift */; };
+		0731F81BE5B9BB0FBF02D9B0 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFFE9D473965A499EAA66B /* GameCenterManager.swift */; };
+		085DE634379E2C3858581D2E /* StartMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624C7194D8742F41E2E8AE72 /* StartMatch.swift */; };
+		0DE16ECB70AA469DCA44D154 /* SurvivorsTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6507CC3F29A84557FF6D2E97 /* SurvivorsTheme.swift */; };
+		0FBB1B1D6605A4D11BD1E0CF /* SpacetimeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F52E04206D284E9D43631EA /* SpacetimeModule.swift */; };
+		15BECACBECB5629E3E079CA4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CF6943AB8B6F6B51B32AC9E9 /* Assets.xcassets */; };
+		19110ED276F9C21B74C790AF /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70FA64DF995D7E0DF25FE543 /* GameController.framework */; };
+		1941D6A6E031D9462D1B6889 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC4FDDE4AED632760C3FC2BB /* LobbyView.swift */; };
+		1DC9EBFC0A10AA61DDEBA178 /* SpacetimeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F52E04206D284E9D43631EA /* SpacetimeModule.swift */; };
+		1EFC021C5930B8CC47908E74 /* OfficeAssassinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206E0A9951590598A0ED75F3 /* OfficeAssassinsView.swift */; };
+		1F6A841CDDC8BA33EABE4FBC /* EndMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8C60415A9EF099572B3CBF /* EndMatch.swift */; };
+		1FA0406424FDFCBD77DF01B5 /* SDKCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 799815FCB8173A6D8D5D3C7B /* SDKCompat.swift */; };
+		1FE50B2FEF8B34E9510B0719 /* SpaceTimeDB Survivors - Alternate Music.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 85C393A845D13CF4FC41B611 /* SpaceTimeDB Survivors - Alternate Music.m4a */; };
+		21A5AAC601312F6D34A6D842 /* PlayerTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 018C6AC7561E74EAD7C7D425 /* PlayerTable.swift */; };
+		227E6168ADF20231F3D93E92 /* SpacetimeDB in Frameworks */ = {isa = PBXBuildFile; productRef = 32EEB4C93EC993D10C35D636 /* SpacetimeDB */; };
+		25BA200BC83C88286500FB29 /* SetPlayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B8800F45D3C213B80591A1 /* SetPlayerModel.swift */; };
+		25F1060A4AB13201983844CF /* CombatHitCooldown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2889DCF942F3EA03BAF38830 /* CombatHitCooldown.swift */; };
+		285FDDE4350DCF365104ADF2 /* ToggleReady.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324CED6EC99013D2CD0D5C85 /* ToggleReady.swift */; };
+		28A5F117BA96EDD0A273061A /* SDKCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 799815FCB8173A6D8D5D3C7B /* SDKCompat.swift */; };
+		2E333C7CB1C47F96B6E72A93 /* SurvivorsTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6507CC3F29A84557FF6D2E97 /* SurvivorsTheme.swift */; };
+		2E97F4CCB3DFBA3FA02511E1 /* Join.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1656BB9CA6748A91B68EF6 /* Join.swift */; };
+		2ECF561FD1D2A4FEF38C62A9 /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DE48A8AA92D43DA9FD0620D /* Attack.swift */; };
+		2F6C9F042ED70078679645BC /* Respawn.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3273EA6EAB099B050B82393 /* Respawn.swift */; };
+		323A4832AE52660F90AA2ACD /* MovePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD1208857947AA739F15DB0 /* MovePlayer.swift */; };
+		364F6B9FDE0C1DC1E482A48D /* MoveBotPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB1D2E0035770574B7FE2FA /* MoveBotPlayer.swift */; };
+		394734554C31BB3E25BB72C3 /* LeaveLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51322362F740201EE7C72ED1 /* LeaveLobby.swift */; };
+		3A68D996C2735E78C6DD559F /* SpawnTestPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1E295F55072B5D453F5BAB /* SpawnTestPlayer.swift */; };
+		3B5CDD5983127B8BFA094923 /* Lobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1359D754627968B061455194 /* Lobby.swift */; };
+		3B6D74B1ABC5F40184DDBC37 /* OfficeAssassinsEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E89B0C6064B25DB5B6B74F1 /* OfficeAssassinsEffects.swift */; };
+		3B7CB4C1E91058F4D6831D2C /* SurvivorsTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6507CC3F29A84557FF6D2E97 /* SurvivorsTheme.swift */; };
+		3C639A681F75154B2419254D /* EndMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8C60415A9EF099572B3CBF /* EndMatch.swift */; };
+		3D68D52212DE4641BBA9BFA1 /* WeaponDropTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1B49A9B3E94E2DBF92461A /* WeaponDropTable.swift */; };
+		3F9A39B359406062A8B378C1 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4902BE59980EFC22A52A9C /* Audio.swift */; };
+		41D3807921D3E190E413C48C /* WeaponDropTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1B49A9B3E94E2DBF92461A /* WeaponDropTable.swift */; };
+		440C6AA98D80B2E45FB0489F /* LobbyTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CFCA6784CFC9B0C3E55798 /* LobbyTable.swift */; };
+		461268924C23E6AF5B6B40D1 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8C7D05A9DB03FF38641219 /* Player.swift */; };
+		481C9516D795E9B4323208F4 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70FA64DF995D7E0DF25FE543 /* GameController.framework */; };
+		4953C26481585F3EFEC3832C /* Lobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1359D754627968B061455194 /* Lobby.swift */; };
+		49672E536625D90EE5EF79DB /* SetName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53D3DF20BF1A80BF2CF103 /* SetName.swift */; };
+		4A66357E4EA4A64767757F33 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F5AA25195CB536D9922491 /* TitleView.swift */; };
+		4B9C6205E5B6535630C5EA68 /* OfficeAssassinsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61981F1C0E30197B7764B1F /* OfficeAssassinsApp.swift */; };
+		4C682C60A0C3EB3060987427 /* SpaceTimeDB Survivors - Alternate Music.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 85C393A845D13CF4FC41B611 /* SpaceTimeDB Survivors - Alternate Music.m4a */; };
+		4C8C347E4CDFC6D6D0EFFBCC /* Respawn.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3273EA6EAB099B050B82393 /* Respawn.swift */; };
+		51AE36AA0134CADBFCF5BFC4 /* ClearServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3C52120E8A3DF517DB1E18 /* ClearServer.swift */; };
+		524CDCC17AB191D0CBD97E00 /* LeaveLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51322362F740201EE7C72ED1 /* LeaveLobby.swift */; };
+		559C9841B5D9B7A7CC89DE3A /* PlayerTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 018C6AC7561E74EAD7C7D425 /* PlayerTable.swift */; };
+		591CF8A6D8AC31098EEF7017 /* JoinLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0454B929F53A0E31C31C7DF4 /* JoinLobby.swift */; };
+		5963E1D706182477D1135194 /* LeaveLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51322362F740201EE7C72ED1 /* LeaveLobby.swift */; };
+		59C35F2E6209CD6C2034E411 /* ClearServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3C52120E8A3DF517DB1E18 /* ClearServer.swift */; };
+		59CD2D98F2D8CFBEEE6D1093 /* JoinLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0454B929F53A0E31C31C7DF4 /* JoinLobby.swift */; };
+		5DA0257314F4265D0BEA3B3A /* OfficeAssassinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206E0A9951590598A0ED75F3 /* OfficeAssassinsView.swift */; };
+		5F32AFC704D256066DB4A647 /* CreateLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E816E53CF7270BE08256963 /* CreateLobby.swift */; };
+		6293AE4DE161636C787E47B8 /* JoinLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0454B929F53A0E31C31C7DF4 /* JoinLobby.swift */; };
+		62CBB387F591BF4F9AF66916 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8C7D05A9DB03FF38641219 /* Player.swift */; };
+		64B2EE5D75DD7B58B8593E26 /* MoveBotPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB1D2E0035770574B7FE2FA /* MoveBotPlayer.swift */; };
+		699A98DC403EAB41605238F2 /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a in Resources */ = {isa = PBXBuildFile; fileRef = FA85A55A90D7DFCC40D4457F /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a */; };
+		6A078865999F11BBD063C7C1 /* MovePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD1208857947AA739F15DB0 /* MovePlayer.swift */; };
+		6D4DD38CDFA2589E69C2B102 /* SpawnTestPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1E295F55072B5D453F5BAB /* SpawnTestPlayer.swift */; };
+		6F24ABDC6138DD35F7284F5D /* LobbyBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FF2478B7A4DDD75E67E4A0 /* LobbyBrowserView.swift */; };
+		70B0717EF108429C9BFB738E /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70FA64DF995D7E0DF25FE543 /* GameController.framework */; };
+		71D1ABA7651E9166DE5117F4 /* Leave.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98130E5C5D02F2F31BB7C89 /* Leave.swift */; };
+		71ED5AA212F58AE38B946CDC /* OfficeAssassinsUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F28BCDBD237ECD6EE269333 /* OfficeAssassinsUI.swift */; };
+		725BBB014F5939BEA81E2DBB /* OfficeAssassinsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D86E87CDC99042F55668574 /* OfficeAssassinsViewModel.swift */; };
+		73B8BBD339BF2418BA641BDA /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a in Resources */ = {isa = PBXBuildFile; fileRef = FA85A55A90D7DFCC40D4457F /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a */; };
+		75B667BAC5D91C4C57F6E77B /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DE48A8AA92D43DA9FD0620D /* Attack.swift */; };
+		76112464860193D5CCC72241 /* LobbyTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CFCA6784CFC9B0C3E55798 /* LobbyTable.swift */; };
+		761A6E09357D5E7B70621EAC /* BotPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B545E854A4FAEDE1F69891FB /* BotPlayer.swift */; };
+		7A81E44C367AC57D07AD0AA9 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4902BE59980EFC22A52A9C /* Audio.swift */; };
+		7B5AD52E13EC97830E75C6B5 /* ClearServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3C52120E8A3DF517DB1E18 /* ClearServer.swift */; };
+		7D8FD31A4FD9F63040FEFD27 /* SpawnWeapon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258E9DDCFA65F6EC43E6C884 /* SpawnWeapon.swift */; };
+		7E1435DC1B5A9A9A8DE0BDDC /* OfficeAssassinsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61981F1C0E30197B7764B1F /* OfficeAssassinsApp.swift */; };
+		8010A4F83834D70725E9FE53 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4902BE59980EFC22A52A9C /* Audio.swift */; };
+		80EC2A6CA7C2CCF0481E1C88 /* ToggleReady.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324CED6EC99013D2CD0D5C85 /* ToggleReady.swift */; };
+		80F29A0569D62D6EFCB5A543 /* Join.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1656BB9CA6748A91B68EF6 /* Join.swift */; };
+		81958C4B417AFC84A05CD4D8 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC4FDDE4AED632760C3FC2BB /* LobbyView.swift */; };
+		81979F463AF8056747B5A901 /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a in Resources */ = {isa = PBXBuildFile; fileRef = FA85A55A90D7DFCC40D4457F /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a */; };
+		825B92B903A211B56741F4DD /* OfficeAssassinsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D86E87CDC99042F55668574 /* OfficeAssassinsViewModel.swift */; };
+		84BD1FCBDB62552CC9CDD898 /* OfficeAssassinsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D86E87CDC99042F55668574 /* OfficeAssassinsViewModel.swift */; };
+		85A4384301D34D8062C94A95 /* SpacetimeDB in Frameworks */ = {isa = PBXBuildFile; productRef = 0E75C9167B944C68A07ACF50 /* SpacetimeDB */; };
+		87EEA7CECDF8DBD7B78245A7 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC4FDDE4AED632760C3FC2BB /* LobbyView.swift */; };
+		88F8CB2C9949EA19096350D4 /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DE48A8AA92D43DA9FD0620D /* Attack.swift */; };
+		8ADC23E31E6FBD20CCA96727 /* MoveBotPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB1D2E0035770574B7FE2FA /* MoveBotPlayer.swift */; };
+		8C4022863221C2DCD368E832 /* SpawnWeapon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258E9DDCFA65F6EC43E6C884 /* SpawnWeapon.swift */; };
+		8D2A928C8BC521F9C877D237 /* StartMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624C7194D8742F41E2E8AE72 /* StartMatch.swift */; };
+		8F9E01CB2FAF5DD11882A248 /* OfficeAssassinsUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F28BCDBD237ECD6EE269333 /* OfficeAssassinsUI.swift */; };
+		8FA5F70AA5D257A67576B888 /* SpaceTimeDB Survivors.m4a in Resources */ = {isa = PBXBuildFile; fileRef = A75ABBF927754C3AC77E44C4 /* SpaceTimeDB Survivors.m4a */; };
+		90F0A3FA694F5A60E4B87341 /* BotPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B545E854A4FAEDE1F69891FB /* BotPlayer.swift */; };
+		91568655653AF807D4F9DC3B /* BotAttack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC0824C3AC65D77A19BA76 /* BotAttack.swift */; };
+		95F000E631B11D5E7F60E660 /* WeaponDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8BF08B3A14BC65B92CD8FD /* WeaponDrop.swift */; };
+		9732B7B4F65DB89BCB6EF2BA /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F5AA25195CB536D9922491 /* TitleView.swift */; };
+		9BAD388E02EDA5481A96AD39 /* OfficeAssassinsSprites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6839BF689EC2E74980254E83 /* OfficeAssassinsSprites.swift */; };
+		9BBA6C449E55A3AD59C61402 /* OfficeAssassinsSprites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6839BF689EC2E74980254E83 /* OfficeAssassinsSprites.swift */; };
+		9BC0738D8196A335A5E4B302 /* Leave.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98130E5C5D02F2F31BB7C89 /* Leave.swift */; };
+		9CE43B7F2C75F12D9CC145D0 /* CreateLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E816E53CF7270BE08256963 /* CreateLobby.swift */; };
+		9D34A46532BE062052B56D96 /* LobbyBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FF2478B7A4DDD75E67E4A0 /* LobbyBrowserView.swift */; };
+		A06804DD406F7DD58B1A5881 /* LobbyBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FF2478B7A4DDD75E67E4A0 /* LobbyBrowserView.swift */; };
+		A100E93A23348C958208E5FB /* WeaponDropTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1B49A9B3E94E2DBF92461A /* WeaponDropTable.swift */; };
+		A26ABD428D5873B635ED1B7D /* OfficeAssassinsUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F28BCDBD237ECD6EE269333 /* OfficeAssassinsUI.swift */; };
+		A2DA6A75AF321F900EC24AC4 /* CombatHitCooldown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2889DCF942F3EA03BAF38830 /* CombatHitCooldown.swift */; };
+		A531605E7D944198D9A7986F /* SpawnWeapon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258E9DDCFA65F6EC43E6C884 /* SpawnWeapon.swift */; };
+		A721799E50F6143F6C44C5DB /* Join.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1656BB9CA6748A91B68EF6 /* Join.swift */; };
+		A89AA6C5585A42A94A477FE0 /* SetPlayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B8800F45D3C213B80591A1 /* SetPlayerModel.swift */; };
+		ACF406551784168DD79A84AF /* LobbyTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CFCA6784CFC9B0C3E55798 /* LobbyTable.swift */; };
+		B149585C1C4BAB5E27780575 /* MovePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD1208857947AA739F15DB0 /* MovePlayer.swift */; };
+		B5E6D4C88A04EEDEA071D4A4 /* EndMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8C60415A9EF099572B3CBF /* EndMatch.swift */; };
+		B7B21CAF10FB7B261B3D491B /* SetName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53D3DF20BF1A80BF2CF103 /* SetName.swift */; };
+		B7B3A448AA302BF9B9F4795D /* ToggleReady.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324CED6EC99013D2CD0D5C85 /* ToggleReady.swift */; };
+		B94D025971A3F161325E626E /* OfficeAssassinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206E0A9951590598A0ED75F3 /* OfficeAssassinsView.swift */; };
+		BA13448A99933F4D40EFB8E6 /* BotAttack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC0824C3AC65D77A19BA76 /* BotAttack.swift */; };
+		BB32EA65028B6B67E52CE1AD /* StartMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624C7194D8742F41E2E8AE72 /* StartMatch.swift */; };
+		BD22EB90E23D2E178698CA85 /* BotPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B545E854A4FAEDE1F69891FB /* BotPlayer.swift */; };
+		BD9456E03046330AC3306F11 /* OfficeAssassinsEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E89B0C6064B25DB5B6B74F1 /* OfficeAssassinsEffects.swift */; };
+		C80206A25A81EFD75A660749 /* Respawn.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3273EA6EAB099B050B82393 /* Respawn.swift */; };
+		C859CF6C3102468D9956A572 /* OfficeAssassinsEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E89B0C6064B25DB5B6B74F1 /* OfficeAssassinsEffects.swift */; };
+		CB50C3D97A3377FB65D7C3E2 /* CombatHitCooldown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2889DCF942F3EA03BAF38830 /* CombatHitCooldown.swift */; };
+		CCC662C8B89B1413D894F5EB /* SetName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53D3DF20BF1A80BF2CF103 /* SetName.swift */; };
+		CDA0D1DF3C03BBEC52A168FA /* PlayerTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 018C6AC7561E74EAD7C7D425 /* PlayerTable.swift */; };
+		CFECAF73903B71543E2988D9 /* SDKCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 799815FCB8173A6D8D5D3C7B /* SDKCompat.swift */; };
+		D15CBE87FEF952D96F4CF696 /* OfficeAssassinsSprites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6839BF689EC2E74980254E83 /* OfficeAssassinsSprites.swift */; };
+		DC72F9A559871D51CEB593B4 /* WeaponDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8BF08B3A14BC65B92CD8FD /* WeaponDrop.swift */; };
+		DCD0495DE829C9D9F2A86AE7 /* Leave.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98130E5C5D02F2F31BB7C89 /* Leave.swift */; };
+		E34957A35DDDC2713678AB73 /* SpacetimeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F52E04206D284E9D43631EA /* SpacetimeModule.swift */; };
+		E472B9278F11137BCC22D89F /* WeaponDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8BF08B3A14BC65B92CD8FD /* WeaponDrop.swift */; };
+		E599A9FD75FDEFE4D061B449 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFFE9D473965A499EAA66B /* GameCenterManager.swift */; };
+		E8267E127A004C72F369220A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CF6943AB8B6F6B51B32AC9E9 /* Assets.xcassets */; };
+		E836E9CA3B88056A3A507A22 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CF6943AB8B6F6B51B32AC9E9 /* Assets.xcassets */; };
+		EAA337A4AE7E9FFB795932EE /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8C7D05A9DB03FF38641219 /* Player.swift */; };
+		EB301D2A131C08CD3AF59534 /* SpacetimeDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1856DD5D60F0F2A8CAE58AFD /* SpacetimeDB */; };
+		F3FA958C73DF0EEC86B7C3FE /* CreateLobby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E816E53CF7270BE08256963 /* CreateLobby.swift */; };
+		F4C4245F28AACFB45A8F65D2 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFFE9D473965A499EAA66B /* GameCenterManager.swift */; };
+		F5E7A58CCF6E9F7BE67DE473 /* SpaceTimeDB Survivors - Alternate Music.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 85C393A845D13CF4FC41B611 /* SpaceTimeDB Survivors - Alternate Music.m4a */; };
+		F63257CE94C05035B90F91F0 /* SetPlayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B8800F45D3C213B80591A1 /* SetPlayerModel.swift */; };
+		FAD61048CC3FC080D2EC10EB /* SpawnTestPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1E295F55072B5D453F5BAB /* SpawnTestPlayer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		018C6AC7561E74EAD7C7D425 /* PlayerTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTable.swift; sourceTree = "<group>"; };
+		0454B929F53A0E31C31C7DF4 /* JoinLobby.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinLobby.swift; sourceTree = "<group>"; };
+		0FD1208857947AA739F15DB0 /* MovePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovePlayer.swift; sourceTree = "<group>"; };
+		1359D754627968B061455194 /* Lobby.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lobby.swift; sourceTree = "<group>"; };
+		1D86E87CDC99042F55668574 /* OfficeAssassinsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeAssassinsViewModel.swift; sourceTree = "<group>"; };
+		1F28BCDBD237ECD6EE269333 /* OfficeAssassinsUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeAssassinsUI.swift; sourceTree = "<group>"; };
+		206E0A9951590598A0ED75F3 /* OfficeAssassinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeAssassinsView.swift; sourceTree = "<group>"; };
+		258E9DDCFA65F6EC43E6C884 /* SpawnWeapon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpawnWeapon.swift; sourceTree = "<group>"; };
+		2889DCF942F3EA03BAF38830 /* CombatHitCooldown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatHitCooldown.swift; sourceTree = "<group>"; };
+		28FF2478B7A4DDD75E67E4A0 /* LobbyBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyBrowserView.swift; sourceTree = "<group>"; };
+		2D8C60415A9EF099572B3CBF /* EndMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndMatch.swift; sourceTree = "<group>"; };
+		2DE48A8AA92D43DA9FD0620D /* Attack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attack.swift; sourceTree = "<group>"; };
+		324CED6EC99013D2CD0D5C85 /* ToggleReady.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleReady.swift; sourceTree = "<group>"; };
+		33F5AA25195CB536D9922491 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
+		3F1A66838A7F31FF0474EE81 /* OfficeAssassins.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = OfficeAssassins.app; path = "Office Assassins.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F8BF08B3A14BC65B92CD8FD /* WeaponDrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponDrop.swift; sourceTree = "<group>"; };
+		51322362F740201EE7C72ED1 /* LeaveLobby.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaveLobby.swift; sourceTree = "<group>"; };
+		5E89B0C6064B25DB5B6B74F1 /* OfficeAssassinsEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeAssassinsEffects.swift; sourceTree = "<group>"; };
+		624C7194D8742F41E2E8AE72 /* StartMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartMatch.swift; sourceTree = "<group>"; };
+		6507CC3F29A84557FF6D2E97 /* SurvivorsTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurvivorsTheme.swift; sourceTree = "<group>"; };
+		6839BF689EC2E74980254E83 /* OfficeAssassinsSprites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeAssassinsSprites.swift; sourceTree = "<group>"; };
+		6F1656BB9CA6748A91B68EF6 /* Join.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Join.swift; sourceTree = "<group>"; };
+		6F52E04206D284E9D43631EA /* SpacetimeModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacetimeModule.swift; sourceTree = "<group>"; };
+		70FA64DF995D7E0DF25FE543 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
+		799815FCB8173A6D8D5D3C7B /* SDKCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKCompat.swift; sourceTree = "<group>"; };
+		7A1E295F55072B5D453F5BAB /* SpawnTestPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpawnTestPlayer.swift; sourceTree = "<group>"; };
+		85C393A845D13CF4FC41B611 /* SpaceTimeDB Survivors - Alternate Music.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceTimeDB Survivors - Alternate Music.m4a"; sourceTree = "<group>"; };
+		8B53D3DF20BF1A80BF2CF103 /* SetName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetName.swift; sourceTree = "<group>"; };
+		8D4902BE59980EFC22A52A9C /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
+		9E816E53CF7270BE08256963 /* CreateLobby.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLobby.swift; sourceTree = "<group>"; };
+		9FBC0824C3AC65D77A19BA76 /* BotAttack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotAttack.swift; sourceTree = "<group>"; };
+		A417AFB1F13A808B5705B076 /* Office Assassins.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Office Assassins.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A61981F1C0E30197B7764B1F /* OfficeAssassinsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeAssassinsApp.swift; sourceTree = "<group>"; };
+		A75ABBF927754C3AC77E44C4 /* SpaceTimeDB Survivors.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceTimeDB Survivors.m4a"; sourceTree = "<group>"; };
+		AC4FDDE4AED632760C3FC2BB /* LobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView.swift; sourceTree = "<group>"; };
+		AD3C52120E8A3DF517DB1E18 /* ClearServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearServer.swift; sourceTree = "<group>"; };
+		B3273EA6EAB099B050B82393 /* Respawn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Respawn.swift; sourceTree = "<group>"; };
+		B545E854A4FAEDE1F69891FB /* BotPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotPlayer.swift; sourceTree = "<group>"; };
+		B9B8800F45D3C213B80591A1 /* SetPlayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetPlayerModel.swift; sourceTree = "<group>"; };
+		BD8C7D05A9DB03FF38641219 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		C98130E5C5D02F2F31BB7C89 /* Leave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Leave.swift; sourceTree = "<group>"; };
+		CF6943AB8B6F6B51B32AC9E9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA1B49A9B3E94E2DBF92461A /* WeaponDropTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponDropTable.swift; sourceTree = "<group>"; };
+		DBB1D2E0035770574B7FE2FA /* MoveBotPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveBotPlayer.swift; sourceTree = "<group>"; };
+		DE2BDE0ED74ABA8E9CAA0299 /* OfficeAssassins-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; name = "OfficeAssassins-iOS.app"; path = "Office Assassins.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6CFFE9D473965A499EAA66B /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
+		F8CFCA6784CFC9B0C3E55798 /* LobbyTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyTable.swift; sourceTree = "<group>"; };
+		FA85A55A90D7DFCC40D4457F /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".!37308!SpaceTimeDB Survivors - Alternate Music.m4a"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		01AE52784E53AF0864F72368 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB301D2A131C08CD3AF59534 /* SpacetimeDB in Frameworks */,
+				70B0717EF108429C9BFB738E /* GameController.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BDCB6E95F38A3B313ACB4BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85A4384301D34D8062C94A95 /* SpacetimeDB in Frameworks */,
+				481C9516D795E9B4323208F4 /* GameController.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7C9E9423617E8E4C5CA145FA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				227E6168ADF20231F3D93E92 /* SpacetimeDB in Frameworks */,
+				19110ED276F9C21B74C790AF /* GameController.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		21D6EB361FB4C27B775CD5C9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				FA85A55A90D7DFCC40D4457F /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a */,
+				CF6943AB8B6F6B51B32AC9E9 /* Assets.xcassets */,
+				85C393A845D13CF4FC41B611 /* SpaceTimeDB Survivors - Alternate Music.m4a */,
+				A75ABBF927754C3AC77E44C4 /* SpaceTimeDB Survivors.m4a */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3D4EEDB2578819BB62ADC0D7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DE2BDE0ED74ABA8E9CAA0299 /* OfficeAssassins-iOS.app */,
+				A417AFB1F13A808B5705B076 /* Office Assassins.app */,
+				3F1A66838A7F31FF0474EE81 /* OfficeAssassins.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6714D7A1324F20217099B263 /* OfficeAssassinsClient */ = {
+			isa = PBXGroup;
+			children = (
+				DE3CA3B9908E659160CE7E49 /* Generated */,
+				21D6EB361FB4C27B775CD5C9 /* Resources */,
+				8D4902BE59980EFC22A52A9C /* Audio.swift */,
+				F6CFFE9D473965A499EAA66B /* GameCenterManager.swift */,
+				28FF2478B7A4DDD75E67E4A0 /* LobbyBrowserView.swift */,
+				AC4FDDE4AED632760C3FC2BB /* LobbyView.swift */,
+				A61981F1C0E30197B7764B1F /* OfficeAssassinsApp.swift */,
+				5E89B0C6064B25DB5B6B74F1 /* OfficeAssassinsEffects.swift */,
+				6839BF689EC2E74980254E83 /* OfficeAssassinsSprites.swift */,
+				1F28BCDBD237ECD6EE269333 /* OfficeAssassinsUI.swift */,
+				206E0A9951590598A0ED75F3 /* OfficeAssassinsView.swift */,
+				1D86E87CDC99042F55668574 /* OfficeAssassinsViewModel.swift */,
+				799815FCB8173A6D8D5D3C7B /* SDKCompat.swift */,
+				6507CC3F29A84557FF6D2E97 /* SurvivorsTheme.swift */,
+				33F5AA25195CB536D9922491 /* TitleView.swift */,
+			);
+			name = OfficeAssassinsClient;
+			path = Sources/OfficeAssassinsClient;
+			sourceTree = "<group>";
+		};
+		AF93A3A0080AE5EE9EFC2F36 = {
+			isa = PBXGroup;
+			children = (
+				6714D7A1324F20217099B263 /* OfficeAssassinsClient */,
+				F65278AC93A2D7BFD8FDB9DD /* Frameworks */,
+				3D4EEDB2578819BB62ADC0D7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DE3CA3B9908E659160CE7E49 /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				2DE48A8AA92D43DA9FD0620D /* Attack.swift */,
+				9FBC0824C3AC65D77A19BA76 /* BotAttack.swift */,
+				B545E854A4FAEDE1F69891FB /* BotPlayer.swift */,
+				AD3C52120E8A3DF517DB1E18 /* ClearServer.swift */,
+				2889DCF942F3EA03BAF38830 /* CombatHitCooldown.swift */,
+				9E816E53CF7270BE08256963 /* CreateLobby.swift */,
+				2D8C60415A9EF099572B3CBF /* EndMatch.swift */,
+				6F1656BB9CA6748A91B68EF6 /* Join.swift */,
+				0454B929F53A0E31C31C7DF4 /* JoinLobby.swift */,
+				C98130E5C5D02F2F31BB7C89 /* Leave.swift */,
+				51322362F740201EE7C72ED1 /* LeaveLobby.swift */,
+				1359D754627968B061455194 /* Lobby.swift */,
+				F8CFCA6784CFC9B0C3E55798 /* LobbyTable.swift */,
+				DBB1D2E0035770574B7FE2FA /* MoveBotPlayer.swift */,
+				0FD1208857947AA739F15DB0 /* MovePlayer.swift */,
+				BD8C7D05A9DB03FF38641219 /* Player.swift */,
+				018C6AC7561E74EAD7C7D425 /* PlayerTable.swift */,
+				B3273EA6EAB099B050B82393 /* Respawn.swift */,
+				8B53D3DF20BF1A80BF2CF103 /* SetName.swift */,
+				B9B8800F45D3C213B80591A1 /* SetPlayerModel.swift */,
+				6F52E04206D284E9D43631EA /* SpacetimeModule.swift */,
+				7A1E295F55072B5D453F5BAB /* SpawnTestPlayer.swift */,
+				258E9DDCFA65F6EC43E6C884 /* SpawnWeapon.swift */,
+				624C7194D8742F41E2E8AE72 /* StartMatch.swift */,
+				324CED6EC99013D2CD0D5C85 /* ToggleReady.swift */,
+				4F8BF08B3A14BC65B92CD8FD /* WeaponDrop.swift */,
+				DA1B49A9B3E94E2DBF92461A /* WeaponDropTable.swift */,
+			);
+			path = Generated;
+			sourceTree = "<group>";
+		};
+		F65278AC93A2D7BFD8FDB9DD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				70FA64DF995D7E0DF25FE543 /* GameController.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5A0D7F817D44DC7B117E9D19 /* OfficeAssassins */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5DE63BCC741D189FC643DE6 /* Build configuration list for PBXNativeTarget "OfficeAssassins" */;
+			buildPhases = (
+				E3A6B257D664F6EC7D3E6FED /* Sources */,
+				E6D9FB9EDBEC59E70955848F /* Resources */,
+				3BDCB6E95F38A3B313ACB4BC /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OfficeAssassins;
+			packageProductDependencies = (
+				0E75C9167B944C68A07ACF50 /* SpacetimeDB */,
+			);
+			productName = OfficeAssassins;
+			productReference = 3F1A66838A7F31FF0474EE81 /* OfficeAssassins.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6BF3FEECC0FEE7A1E1F5C4B3 /* OfficeAssassins-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA108602888632E0FBD037AE /* Build configuration list for PBXNativeTarget "OfficeAssassins-tvOS" */;
+			buildPhases = (
+				0177D53EE3ECA4AD7712A450 /* Sources */,
+				D416A1C6FE2078B663FB1217 /* Resources */,
+				01AE52784E53AF0864F72368 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "OfficeAssassins-tvOS";
+			packageProductDependencies = (
+				1856DD5D60F0F2A8CAE58AFD /* SpacetimeDB */,
+			);
+			productName = "OfficeAssassins-tvOS";
+			productReference = A417AFB1F13A808B5705B076 /* Office Assassins.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F731018D17FA2FCBD7F30174 /* OfficeAssassins-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F2FF3274E105B474193773B5 /* Build configuration list for PBXNativeTarget "OfficeAssassins-iOS" */;
+			buildPhases = (
+				6C5525300AE57D4AE084D87D /* Sources */,
+				352C5ECBB706C434D32A5823 /* Resources */,
+				7C9E9423617E8E4C5CA145FA /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "OfficeAssassins-iOS";
+			packageProductDependencies = (
+				32EEB4C93EC993D10C35D636 /* SpacetimeDB */,
+			);
+			productName = "OfficeAssassins-iOS";
+			productReference = DE2BDE0ED74ABA8E9CAA0299 /* OfficeAssassins-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8B4D62921FFE3A6AA1635314 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					5A0D7F817D44DC7B117E9D19 = {
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
+						};
+					};
+					6BF3FEECC0FEE7A1E1F5C4B3 = {
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
+						};
+					};
+					F731018D17FA2FCBD7F30174 = {
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = CCD02A8E2760D0DEC10831E1 /* Build configuration list for PBXProject "OfficeAssassins" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = AF93A3A0080AE5EE9EFC2F36;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				532625473CC2F944E8B32C46 /* XCRemoteSwiftPackageReference "spacetimedb-swift" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5A0D7F817D44DC7B117E9D19 /* OfficeAssassins */,
+				F731018D17FA2FCBD7F30174 /* OfficeAssassins-iOS */,
+				6BF3FEECC0FEE7A1E1F5C4B3 /* OfficeAssassins-tvOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		352C5ECBB706C434D32A5823 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				81979F463AF8056747B5A901 /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a in Resources */,
+				E8267E127A004C72F369220A /* Assets.xcassets in Resources */,
+				F5E7A58CCF6E9F7BE67DE473 /* SpaceTimeDB Survivors - Alternate Music.m4a in Resources */,
+				0051AC5C509D9DAAD318F997 /* SpaceTimeDB Survivors.m4a in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D416A1C6FE2078B663FB1217 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73B8BBD339BF2418BA641BDA /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a in Resources */,
+				E836E9CA3B88056A3A507A22 /* Assets.xcassets in Resources */,
+				4C682C60A0C3EB3060987427 /* SpaceTimeDB Survivors - Alternate Music.m4a in Resources */,
+				0002CBBE8DB959B290D5D84C /* SpaceTimeDB Survivors.m4a in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6D9FB9EDBEC59E70955848F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				699A98DC403EAB41605238F2 /* .!37308!SpaceTimeDB Survivors - Alternate Music.m4a in Resources */,
+				15BECACBECB5629E3E079CA4 /* Assets.xcassets in Resources */,
+				1FE50B2FEF8B34E9510B0719 /* SpaceTimeDB Survivors - Alternate Music.m4a in Resources */,
+				8FA5F70AA5D257A67576B888 /* SpaceTimeDB Survivors.m4a in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0177D53EE3ECA4AD7712A450 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				88F8CB2C9949EA19096350D4 /* Attack.swift in Sources */,
+				7A81E44C367AC57D07AD0AA9 /* Audio.swift in Sources */,
+				BA13448A99933F4D40EFB8E6 /* BotAttack.swift in Sources */,
+				BD22EB90E23D2E178698CA85 /* BotPlayer.swift in Sources */,
+				7B5AD52E13EC97830E75C6B5 /* ClearServer.swift in Sources */,
+				25F1060A4AB13201983844CF /* CombatHitCooldown.swift in Sources */,
+				9CE43B7F2C75F12D9CC145D0 /* CreateLobby.swift in Sources */,
+				1F6A841CDDC8BA33EABE4FBC /* EndMatch.swift in Sources */,
+				0731F81BE5B9BB0FBF02D9B0 /* GameCenterManager.swift in Sources */,
+				A721799E50F6143F6C44C5DB /* Join.swift in Sources */,
+				591CF8A6D8AC31098EEF7017 /* JoinLobby.swift in Sources */,
+				71D1ABA7651E9166DE5117F4 /* Leave.swift in Sources */,
+				5963E1D706182477D1135194 /* LeaveLobby.swift in Sources */,
+				4953C26481585F3EFEC3832C /* Lobby.swift in Sources */,
+				A06804DD406F7DD58B1A5881 /* LobbyBrowserView.swift in Sources */,
+				ACF406551784168DD79A84AF /* LobbyTable.swift in Sources */,
+				1941D6A6E031D9462D1B6889 /* LobbyView.swift in Sources */,
+				64B2EE5D75DD7B58B8593E26 /* MoveBotPlayer.swift in Sources */,
+				B149585C1C4BAB5E27780575 /* MovePlayer.swift in Sources */,
+				053FDCFE282922AB0EB6BD6F /* OfficeAssassinsApp.swift in Sources */,
+				C859CF6C3102468D9956A572 /* OfficeAssassinsEffects.swift in Sources */,
+				9BAD388E02EDA5481A96AD39 /* OfficeAssassinsSprites.swift in Sources */,
+				71ED5AA212F58AE38B946CDC /* OfficeAssassinsUI.swift in Sources */,
+				5DA0257314F4265D0BEA3B3A /* OfficeAssassinsView.swift in Sources */,
+				725BBB014F5939BEA81E2DBB /* OfficeAssassinsViewModel.swift in Sources */,
+				461268924C23E6AF5B6B40D1 /* Player.swift in Sources */,
+				21A5AAC601312F6D34A6D842 /* PlayerTable.swift in Sources */,
+				2F6C9F042ED70078679645BC /* Respawn.swift in Sources */,
+				CFECAF73903B71543E2988D9 /* SDKCompat.swift in Sources */,
+				CCC662C8B89B1413D894F5EB /* SetName.swift in Sources */,
+				F63257CE94C05035B90F91F0 /* SetPlayerModel.swift in Sources */,
+				1DC9EBFC0A10AA61DDEBA178 /* SpacetimeModule.swift in Sources */,
+				3A68D996C2735E78C6DD559F /* SpawnTestPlayer.swift in Sources */,
+				A531605E7D944198D9A7986F /* SpawnWeapon.swift in Sources */,
+				8D2A928C8BC521F9C877D237 /* StartMatch.swift in Sources */,
+				2E333C7CB1C47F96B6E72A93 /* SurvivorsTheme.swift in Sources */,
+				4A66357E4EA4A64767757F33 /* TitleView.swift in Sources */,
+				B7B3A448AA302BF9B9F4795D /* ToggleReady.swift in Sources */,
+				E472B9278F11137BCC22D89F /* WeaponDrop.swift in Sources */,
+				41D3807921D3E190E413C48C /* WeaponDropTable.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C5525300AE57D4AE084D87D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2ECF561FD1D2A4FEF38C62A9 /* Attack.swift in Sources */,
+				3F9A39B359406062A8B378C1 /* Audio.swift in Sources */,
+				91568655653AF807D4F9DC3B /* BotAttack.swift in Sources */,
+				90F0A3FA694F5A60E4B87341 /* BotPlayer.swift in Sources */,
+				51AE36AA0134CADBFCF5BFC4 /* ClearServer.swift in Sources */,
+				A2DA6A75AF321F900EC24AC4 /* CombatHitCooldown.swift in Sources */,
+				5F32AFC704D256066DB4A647 /* CreateLobby.swift in Sources */,
+				B5E6D4C88A04EEDEA071D4A4 /* EndMatch.swift in Sources */,
+				E599A9FD75FDEFE4D061B449 /* GameCenterManager.swift in Sources */,
+				80F29A0569D62D6EFCB5A543 /* Join.swift in Sources */,
+				59CD2D98F2D8CFBEEE6D1093 /* JoinLobby.swift in Sources */,
+				9BC0738D8196A335A5E4B302 /* Leave.swift in Sources */,
+				394734554C31BB3E25BB72C3 /* LeaveLobby.swift in Sources */,
+				00660A5B90BD169B46A470E9 /* Lobby.swift in Sources */,
+				6F24ABDC6138DD35F7284F5D /* LobbyBrowserView.swift in Sources */,
+				440C6AA98D80B2E45FB0489F /* LobbyTable.swift in Sources */,
+				87EEA7CECDF8DBD7B78245A7 /* LobbyView.swift in Sources */,
+				8ADC23E31E6FBD20CCA96727 /* MoveBotPlayer.swift in Sources */,
+				323A4832AE52660F90AA2ACD /* MovePlayer.swift in Sources */,
+				4B9C6205E5B6535630C5EA68 /* OfficeAssassinsApp.swift in Sources */,
+				BD9456E03046330AC3306F11 /* OfficeAssassinsEffects.swift in Sources */,
+				D15CBE87FEF952D96F4CF696 /* OfficeAssassinsSprites.swift in Sources */,
+				A26ABD428D5873B635ED1B7D /* OfficeAssassinsUI.swift in Sources */,
+				B94D025971A3F161325E626E /* OfficeAssassinsView.swift in Sources */,
+				84BD1FCBDB62552CC9CDD898 /* OfficeAssassinsViewModel.swift in Sources */,
+				62CBB387F591BF4F9AF66916 /* Player.swift in Sources */,
+				559C9841B5D9B7A7CC89DE3A /* PlayerTable.swift in Sources */,
+				C80206A25A81EFD75A660749 /* Respawn.swift in Sources */,
+				28A5F117BA96EDD0A273061A /* SDKCompat.swift in Sources */,
+				49672E536625D90EE5EF79DB /* SetName.swift in Sources */,
+				A89AA6C5585A42A94A477FE0 /* SetPlayerModel.swift in Sources */,
+				0FBB1B1D6605A4D11BD1E0CF /* SpacetimeModule.swift in Sources */,
+				6D4DD38CDFA2589E69C2B102 /* SpawnTestPlayer.swift in Sources */,
+				8C4022863221C2DCD368E832 /* SpawnWeapon.swift in Sources */,
+				085DE634379E2C3858581D2E /* StartMatch.swift in Sources */,
+				0DE16ECB70AA469DCA44D154 /* SurvivorsTheme.swift in Sources */,
+				038EF1EF4109C306EF7264BC /* TitleView.swift in Sources */,
+				80EC2A6CA7C2CCF0481E1C88 /* ToggleReady.swift in Sources */,
+				DC72F9A559871D51CEB593B4 /* WeaponDrop.swift in Sources */,
+				A100E93A23348C958208E5FB /* WeaponDropTable.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E3A6B257D664F6EC7D3E6FED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				75B667BAC5D91C4C57F6E77B /* Attack.swift in Sources */,
+				8010A4F83834D70725E9FE53 /* Audio.swift in Sources */,
+				057007672D898BD0537E4BB7 /* BotAttack.swift in Sources */,
+				761A6E09357D5E7B70621EAC /* BotPlayer.swift in Sources */,
+				59C35F2E6209CD6C2034E411 /* ClearServer.swift in Sources */,
+				CB50C3D97A3377FB65D7C3E2 /* CombatHitCooldown.swift in Sources */,
+				F3FA958C73DF0EEC86B7C3FE /* CreateLobby.swift in Sources */,
+				3C639A681F75154B2419254D /* EndMatch.swift in Sources */,
+				F4C4245F28AACFB45A8F65D2 /* GameCenterManager.swift in Sources */,
+				2E97F4CCB3DFBA3FA02511E1 /* Join.swift in Sources */,
+				6293AE4DE161636C787E47B8 /* JoinLobby.swift in Sources */,
+				DCD0495DE829C9D9F2A86AE7 /* Leave.swift in Sources */,
+				524CDCC17AB191D0CBD97E00 /* LeaveLobby.swift in Sources */,
+				3B5CDD5983127B8BFA094923 /* Lobby.swift in Sources */,
+				9D34A46532BE062052B56D96 /* LobbyBrowserView.swift in Sources */,
+				76112464860193D5CCC72241 /* LobbyTable.swift in Sources */,
+				81958C4B417AFC84A05CD4D8 /* LobbyView.swift in Sources */,
+				364F6B9FDE0C1DC1E482A48D /* MoveBotPlayer.swift in Sources */,
+				6A078865999F11BBD063C7C1 /* MovePlayer.swift in Sources */,
+				7E1435DC1B5A9A9A8DE0BDDC /* OfficeAssassinsApp.swift in Sources */,
+				3B6D74B1ABC5F40184DDBC37 /* OfficeAssassinsEffects.swift in Sources */,
+				9BBA6C449E55A3AD59C61402 /* OfficeAssassinsSprites.swift in Sources */,
+				8F9E01CB2FAF5DD11882A248 /* OfficeAssassinsUI.swift in Sources */,
+				1EFC021C5930B8CC47908E74 /* OfficeAssassinsView.swift in Sources */,
+				825B92B903A211B56741F4DD /* OfficeAssassinsViewModel.swift in Sources */,
+				EAA337A4AE7E9FFB795932EE /* Player.swift in Sources */,
+				CDA0D1DF3C03BBEC52A168FA /* PlayerTable.swift in Sources */,
+				4C8C347E4CDFC6D6D0EFFBCC /* Respawn.swift in Sources */,
+				1FA0406424FDFCBD77DF01B5 /* SDKCompat.swift in Sources */,
+				B7B21CAF10FB7B261B3D491B /* SetName.swift in Sources */,
+				25BA200BC83C88286500FB29 /* SetPlayerModel.swift in Sources */,
+				E34957A35DDDC2713678AB73 /* SpacetimeModule.swift in Sources */,
+				FAD61048CC3FC080D2EC10EB /* SpawnTestPlayer.swift in Sources */,
+				7D8FD31A4FD9F63040FEFD27 /* SpawnWeapon.swift in Sources */,
+				BB32EA65028B6B67E52CE1AD /* StartMatch.swift in Sources */,
+				3B7CB4C1E91058F4D6831D2C /* SurvivorsTheme.swift in Sources */,
+				9732B7B4F65DB89BCB6EF2BA /* TitleView.swift in Sources */,
+				285FDDE4350DCF365104ADF2 /* ToggleReady.swift in Sources */,
+				95F000E631B11D5E7F60E660 /* WeaponDrop.swift in Sources */,
+				3D68D52212DE4641BBA9BFA1 /* WeaponDropTable.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D4366216A84F37FD5EBEAEC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_ENTITLEMENTS = Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = ZAKNS6KQRV;
+				INFOPLIST_FILE = "SupportingFiles/Info-tvOS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ca.avivarma.officeassassins;
+				PRODUCT_NAME = "Office Assassins";
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		2FD5F13190010227B5307EC5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_ENTITLEMENTS = Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = ZAKNS6KQRV;
+				INFOPLIST_FILE = "SupportingFiles/Info-tvOS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ca.avivarma.officeassassins;
+				PRODUCT_NAME = "Office Assassins";
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		4E3975116E1DFB1DF8013A6A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = SupportingFiles/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ca.avivarma.officeassassins;
+				PRODUCT_NAME = "Office Assassins";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		51088E605ACDC0F842A11C0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		6BAC0AC6C831CB675D5DDB1F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = "SupportingFiles/Info-iOS.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ca.avivarma.officeassassins;
+				PRODUCT_NAME = "Office Assassins";
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C4D41D181394FB26BF0169B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = "SupportingFiles/Info-iOS.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ca.avivarma.officeassassins;
+				PRODUCT_NAME = "Office Assassins";
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CBA566BCACEAD9D49391CCDF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/OfficeAssassinsClient/OfficeAssassinsClient.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = SupportingFiles/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ca.avivarma.officeassassins;
+				PRODUCT_NAME = "Office Assassins";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E731485139B1ECAA6D5925F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CCD02A8E2760D0DEC10831E1 /* Build configuration list for PBXProject "OfficeAssassins" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E731485139B1ECAA6D5925F3 /* Debug */,
+				51088E605ACDC0F842A11C0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D5DE63BCC741D189FC643DE6 /* Build configuration list for PBXNativeTarget "OfficeAssassins" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CBA566BCACEAD9D49391CCDF /* Debug */,
+				4E3975116E1DFB1DF8013A6A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DA108602888632E0FBD037AE /* Build configuration list for PBXNativeTarget "OfficeAssassins-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FD5F13190010227B5307EC5 /* Debug */,
+				1D4366216A84F37FD5EBEAEC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F2FF3274E105B474193773B5 /* Build configuration list for PBXNativeTarget "OfficeAssassins-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6BAC0AC6C831CB675D5DDB1F /* Debug */,
+				C4D41D181394FB26BF0169B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		532625473CC2F944E8B32C46 /* XCRemoteSwiftPackageReference "spacetimedb-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/avias8/spacetimedb-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.21.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0E75C9167B944C68A07ACF50 /* SpacetimeDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 532625473CC2F944E8B32C46 /* XCRemoteSwiftPackageReference "spacetimedb-swift" */;
+			productName = SpacetimeDB;
+		};
+		1856DD5D60F0F2A8CAE58AFD /* SpacetimeDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 532625473CC2F944E8B32C46 /* XCRemoteSwiftPackageReference "spacetimedb-swift" */;
+			productName = SpacetimeDB;
+		};
+		32EEB4C93EC993D10C35D636 /* SpacetimeDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 532625473CC2F944E8B32C46 /* XCRemoteSwiftPackageReference "spacetimedb-swift" */;
+			productName = SpacetimeDB;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8B4D62921FFE3A6AA1635314 /* Project object */;
+}

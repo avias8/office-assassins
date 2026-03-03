@@ -634,6 +634,36 @@ pub fn spawn_test_player(ctx: &ReducerContext) {
 }
 
 #[spacetimedb::reducer]
+pub fn move_bot(ctx: &ReducerContext, bot_id: u64, x: f32, y: f32) {
+    let caller_id = player_id_from_ctx(ctx);
+    let Some(caller) = ctx.db.player().id().find(caller_id) else { return; };
+    let Some(caller_lobby) = caller.lobby_id else { return; };
+    if ctx.db.bot_player().id().find(bot_id).is_none() { return; }
+    let Some(mut bot) = ctx.db.player().id().find(bot_id) else { return; };
+    if bot.lobby_id != Some(caller_lobby) || bot.health == 0 { return; }
+    bot.x = clamp_to_world(x);
+    bot.y = clamp_to_world(y);
+    let nearby: Vec<u64> = ctx.db.weapon_drop().iter()
+        .filter(|w| w.lobby_id == caller_lobby)
+        .filter(|w| { let dx = bot.x - w.x; let dy = bot.y - w.y; dx*dx + dy*dy < PICKUP_RADIUS * PICKUP_RADIUS })
+        .map(|w| w.id).collect();
+    for wid in &nearby { ctx.db.weapon_drop().id().delete(*wid); }
+    bot.weapon_count += nearby.len() as u32;
+    ctx.db.player().id().update(bot);
+}
+
+#[spacetimedb::reducer]
+pub fn bot_attack(ctx: &ReducerContext, bot_id: u64, target_id: u64) {
+    let caller_id = player_id_from_ctx(ctx);
+    let Some(caller) = ctx.db.player().id().find(caller_id) else { return; };
+    let Some(caller_lobby) = caller.lobby_id else { return; };
+    if ctx.db.bot_player().id().find(bot_id).is_none() { return; }
+    let Some(bot) = ctx.db.player().id().find(bot_id) else { return; };
+    if bot.lobby_id != Some(caller_lobby) { return; }
+    apply_combat(ctx, bot_id, target_id);
+}
+
+#[spacetimedb::reducer]
 pub fn move_player(ctx: &ReducerContext, x: f32, y: f32) {
     let player_id = player_id_from_ctx(ctx);
     let Some(mut player) = ctx.db.player().id().find(player_id) else {

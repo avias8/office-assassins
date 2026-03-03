@@ -4,8 +4,9 @@ import PackageDescription
 let package = Package(
     name: "OfficeAssassinsClient",
     platforms: [
-        .macOS(.v15),
-        .iOS(.v17)
+        .macOS(.v15),   // SPM floor; Xcode target bumps to 26.0
+        .iOS(.v18),
+        .tvOS(.v18)
     ],
     products: [
         .executable(

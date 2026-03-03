@@ -1,6 +1,7 @@
 import SwiftUI
 import Observation
 import SpacetimeDB
+import GameController
 #if canImport(AppKit)
 import AppKit
 #endif
@@ -122,6 +123,17 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
     var jsBase: CGPoint?
     var jsVector: CGVector = .zero
 
+    // Game controller state (GCController – used on tvOS + MFi)
+    var gcVector: CGVector = .zero
+    private var gcObservers: [any NSObjectProtocol] = []
+    // Tracks which dpad EDGE BUTTONS are currently held (separate from analog drag).
+    // Updated by the individual up/down/left/right valueChangedHandlers so diagonal
+    // edge-presses work correctly (e.g. holding up+right gives √2-normalised diagonal).
+    private var gcBtnUp    = false
+    private var gcBtnDown  = false
+    private var gcBtnLeft  = false
+    private var gcBtnRight = false
+
     // Keyboard state
     private var pressedKeys: Set<UInt16> = []
     private var weaponSpawnLoopTask: Task<Void, Never>?
@@ -133,8 +145,9 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
             let sound: SoundEffects.Sound = isMenuOpen ? .menuOpen : .menuClose
             SoundEffects.shared.play(sound)
             if isMenuOpen {
-                // Don't keep movement keys "held" when opening an input-driven menu.
+                // Don't keep movement inputs "held" when opening an input-driven menu.
                 pressedKeys.removeAll()
+                gcVector = .zero
             }
         }
     }
@@ -184,6 +197,11 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
     private let playerClampPadding: Float = playerEdgePadding
     private let networkSendRate: TimeInterval = 1.0 / 20.0  // Send position to server at 20Hz
     private var lastNetworkSendTime: TimeInterval = 0
+    private let botSendRate: TimeInterval = 1.0 / 10.0     // Bot AI tick rate
+    private var lastBotSendTime: TimeInterval = 0
+    private let botSpeed: Float = 120                       // World units per second
+    private let botStopRadius: Float = 55                   // Stop at ~sword orbit radius
+    private var lastBotAttackTime: [UInt64: TimeInterval] = [:]
     private var movementLoopTask: Task<Void, Never>?
     private var lastMovementTick: TimeInterval = Date.timeIntervalSinceReferenceDate
     private var localPositionDirty = false  // Track if we need to send a network update
@@ -338,7 +356,8 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
 
     private var isMovementInputActive: Bool {
         let dist = sqrt(jsVector.dx * jsVector.dx + jsVector.dy * jsVector.dy)
-        return dist > joystickDeadzone || !pressedKeys.isEmpty
+        let gcDist = sqrt(gcVector.dx * gcVector.dx + gcVector.dy * gcVector.dy)
+        return dist > joystickDeadzone || gcDist > 0.1 || !pressedKeys.isEmpty
     }
 
     init(initialName: String? = nil) {
@@ -353,7 +372,24 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
     // MARK: - Connection
 
     func start() {
-        guard !isStarted else { return }
+        if isStarted {
+            if !isConnected {
+                connectionDetail = "Connecting…"
+                if client == nil {
+                    let recoveredClient = SpacetimeClient(
+                        serverUrl: environment.url,
+                        moduleName: "officeassassins"
+                    )
+                    recoveredClient.delegate = self
+                    self.client = recoveredClient
+                    SpacetimeClient.shared = recoveredClient
+                    recoveredClient.connect()
+                } else {
+                    client?.connect()
+                }
+            }
+            return
+        }
         isStarted = true
 
         let newClient = SpacetimeClient(
@@ -367,6 +403,7 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
 
         startMovementTimer()
         startWeaponSpawner()
+        setupGameControllerInput()
     }
 
     func stop() {
@@ -384,6 +421,7 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
         #if canImport(AppKit)
         removeKeyboardMonitors()
         #endif
+        removeGameControllerObservers()
         isStarted = false
         hasJoined = false
         clearPendingLobbyAction()
@@ -447,10 +485,14 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
         jsActive = false
         jsBase = nil
         jsVector = .zero
+        gcVector = .zero
+        gcBtnUp = false; gcBtnDown = false; gcBtnLeft = false; gcBtnRight = false
         localX = 500
         localY = 500
         localPositionDirty = false
         lastNetworkSendTime = 0
+        lastBotSendTime = 0
+        lastBotAttackTime.removeAll()
         isQuickJoinActive = false
         recentEvents = []
         eventSequence = 0
@@ -790,11 +832,16 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
 
     func scheduleQuickJoinFromTitle() {
         pendingQuickJoinFromTitle = true
+        isQuickJoinActive = true
+        if isStarted, !isConnected {
+            requestReconnectIfNeeded(detail: "Connecting…")
+        }
         performPendingQuickJoinIfNeeded()
     }
 
     func clearPendingQuickJoinFromTitle() {
         pendingQuickJoinFromTitle = false
+        isQuickJoinActive = false
     }
 
     private func performPendingQuickJoinIfNeeded() {
@@ -1197,10 +1244,18 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
         var input = SIMD2<Float>(repeating: 0)
 
         if jsActive && jsVector != .zero {
+            // Touch joystick (iOS)
             let dist = sqrt(jsVector.dx * jsVector.dx + jsVector.dy * jsVector.dy)
             if dist > joystickDeadzone {
                 input.x = Float(jsVector.dx / joystickRadius)
                 input.y = Float(jsVector.dy / joystickRadius)
+            }
+        } else if gcVector != .zero {
+            // MFi game controller / Siri Remote (tvOS)
+            let gcDist = sqrt(gcVector.dx * gcVector.dx + gcVector.dy * gcVector.dy)
+            if gcDist > 0.1 {
+                input.x = Float(gcVector.dx)
+                input.y = Float(gcVector.dy)
             }
         } else {
             // Keyboard: W=13, A=0, S=1, D=2, ←=123, →=124, ↓=125, ↑=126
@@ -1236,8 +1291,69 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
             checkSwordCollisions(now: now)
         }
 
+        tickBotAI(now: now)
+
         // Throttled network send so we don't flood the server
         flushPositionIfNeeded(now: now)
+    }
+
+    // MARK: - Bot AI
+
+    private func tickBotAI(now: TimeInterval) {
+        guard now - lastBotSendTime >= botSendRate else { return }
+        guard let myLobbyId = myPlayer?.lobbyId else { return }
+        let bots = players.filter { $0.lobbyId == myLobbyId && $0.name.hasPrefix("Bot ") && $0.health > 0 }
+        guard !bots.isEmpty else { return }
+        lastBotSendTime = now
+
+        let myX = localX
+        let myY = localY
+        let dt = Float(botSendRate)
+
+        guard let myId = userId, let me = myPlayer else { return }
+
+        for bot in bots {
+            // Movement
+            if bot.weaponCount == 0, let w = weapons.min(by: {
+                let a = $0.x - bot.x, b = $0.y - bot.y
+                let c = $1.x - bot.x, d = $1.y - bot.y
+                return a*a + b*b < c*c + d*d
+            }) {
+                let dx = w.x - bot.x, dy = w.y - bot.y
+                let dist = sqrt(dx*dx + dy*dy)
+                if dist > 0.5 {
+                    let step = min(botSpeed * dt, dist)
+                    MoveBotPlayer.invoke(botId: bot.id, x: bot.x + dx / dist * step, y: bot.y + dy / dist * step)
+                }
+            } else {
+                let dx = myX - bot.x, dy = myY - bot.y
+                let distSq = dx*dx + dy*dy
+                if distSq > botStopRadius * botStopRadius {
+                    let dist = sqrt(distSq)
+                    let step = min(botSpeed * dt, dist - botStopRadius)
+                    MoveBotPlayer.invoke(botId: bot.id, x: bot.x + dx / dist * step, y: bot.y + dy / dist * step)
+                }
+            }
+
+            // Sword collision: check if bot's orbiting swords hit the local player
+            guard bot.weaponCount > 0, me.health > 0 else { continue }
+            let lastHit = lastBotAttackTime[bot.id] ?? -Double.infinity
+            guard now - lastHit >= swordHitCooldown else { continue }
+
+            var swordOffsets: [SwordOffset] = []
+            forEachSwordPosition(count: Int(bot.weaponCount), t: now) { offset in
+                swordOffsets.append(SwordOffset(x: Float(offset.x), y: Float(offset.y)))
+            }
+            let snapshot = SwordCollisionSnapshot(
+                myX: bot.x, myY: bot.y, now: now, cooldown: swordHitCooldown,
+                swordOffsets: swordOffsets,
+                targets: [CollisionTargetSnapshot(id: myId, x: myX, y: myY, lastHitTime: lastHit)]
+            )
+            if !Self.computeSwordCollisionHits(snapshot: snapshot, maxHits: 1).isEmpty {
+                lastBotAttackTime[bot.id] = now
+                BotAttack.invoke(botId: bot.id, targetId: myId)
+            }
+        }
     }
 
     /// Checks whether any of my orbiting swords are touching another player.
@@ -1555,6 +1671,125 @@ public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
         #if canImport(AppKit)
         removeKeyboardMonitors()
         #endif
+    }
+
+    // MARK: - GCController (tvOS + MFi)
+
+    private func setupGameControllerInput() {
+        removeGameControllerObservers()
+
+        // Bind already-connected controllers
+        for controller in GCController.controllers() {
+            bindController(controller)
+        }
+
+        // Watch for new connections – queue:.main guarantees we're on the main thread.
+        // Re-enumerate GCController.controllers() from within the actor context
+        // so we never capture a non-Sendable GCController across an isolation boundary.
+        let connectObs = NotificationCenter.default.addObserver(
+            forName: .GCControllerDidConnect,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                for c in GCController.controllers() { self.bindController(c) }
+            }
+        }
+        gcObservers.append(connectObs)
+
+        let disconnectObs = NotificationCenter.default.addObserver(
+            forName: .GCControllerDidDisconnect,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.gcVector = .zero }
+        }
+        gcObservers.append(disconnectObs)
+    }
+
+    /// Recomputes gcVector from currently-held dpad edge buttons.
+    /// Called whenever any directional button changes state.
+    private func recomputeGCButtonVector() {
+        var dx: CGFloat = 0, dy: CGFloat = 0
+        if gcBtnLeft  { dx -= 1 }
+        if gcBtnRight { dx += 1 }
+        if gcBtnUp    { dy -= 1 }
+        if gcBtnDown  { dy += 1 }
+        let len = sqrt(dx * dx + dy * dy)
+        gcVector = len > 0 ? CGVector(dx: dx / len, dy: dy / len) : .zero
+    }
+
+    /// Binds the 4 directional edge-button handlers on a dpad (works for both
+    /// extendedGamepad.dpad and microGamepad.dpad).  Edge presses on the Siri Remote
+    /// fire these digital button events; dragging the centre fires the analog
+    /// valueChangedHandler below — both ultimately write to gcVector.
+    private func bindDpadButtons(_ dpad: GCControllerDirectionPad) {
+        dpad.up.valueChangedHandler = { [weak self] _, _, pressed in
+            Task { @MainActor [weak self] in self?.gcBtnUp    = pressed; self?.recomputeGCButtonVector() }
+        }
+        dpad.down.valueChangedHandler = { [weak self] _, _, pressed in
+            Task { @MainActor [weak self] in self?.gcBtnDown  = pressed; self?.recomputeGCButtonVector() }
+        }
+        dpad.left.valueChangedHandler = { [weak self] _, _, pressed in
+            Task { @MainActor [weak self] in self?.gcBtnLeft  = pressed; self?.recomputeGCButtonVector() }
+        }
+        dpad.right.valueChangedHandler = { [weak self] _, _, pressed in
+            Task { @MainActor [weak self] in self?.gcBtnRight = pressed; self?.recomputeGCButtonVector() }
+        }
+    }
+
+    private func bindController(_ controller: GCController) {
+        if let gp = controller.extendedGamepad {
+            // Analog drag on Siri Remote clickpad (centre touch-drag) → dpad analog values.
+            // Physical thumbstick on MFi/Xbox/PS controllers → leftThumbstick values.
+            // Both write to gcVector; last-fired wins (they don't conflict in practice).
+            gp.dpad.valueChangedHandler = { [weak self] _, x, y in
+                let vec = CGVector(dx: CGFloat(x), dy: CGFloat(-y))
+                Task { @MainActor [weak self] in self?.gcVector = vec }
+            }
+            gp.leftThumbstick.valueChangedHandler = { [weak self] _, x, y in
+                let vec = CGVector(dx: CGFloat(x), dy: CGFloat(-y))
+                Task { @MainActor [weak self] in self?.gcVector = vec }
+            }
+            // Edge button presses on Siri Remote clickpad (up/down/left/right physical click).
+            bindDpadButtons(gp.dpad)
+            gp.buttonMenu.valueChangedHandler = { [weak self] _, _, pressed in
+                guard pressed else { return }
+                Task { @MainActor [weak self] in self?.isMenuOpen.toggle() }
+            }
+        } else if let micro = controller.microGamepad {
+            // Older Siri Remotes (1st/2nd gen) – microGamepad only.
+            // Analog centre drag:
+            micro.dpad.valueChangedHandler = { [weak self] _, x, y in
+                let vec = CGVector(dx: CGFloat(x), dy: CGFloat(-y))
+                Task { @MainActor [weak self] in self?.gcVector = vec }
+            }
+            // Digital edge presses:
+            bindDpadButtons(micro.dpad)
+        }
+    }
+
+    private func removeGameControllerObservers() {
+        gcObservers.forEach { NotificationCenter.default.removeObserver($0) }
+        gcObservers.removeAll()
+        // Clear stale handler references on all currently-connected controllers
+        for controller in GCController.controllers() {
+            controller.extendedGamepad?.dpad.valueChangedHandler = nil
+            controller.extendedGamepad?.dpad.up.valueChangedHandler    = nil
+            controller.extendedGamepad?.dpad.down.valueChangedHandler  = nil
+            controller.extendedGamepad?.dpad.left.valueChangedHandler  = nil
+            controller.extendedGamepad?.dpad.right.valueChangedHandler = nil
+            controller.extendedGamepad?.leftThumbstick.valueChangedHandler = nil
+            controller.extendedGamepad?.buttonMenu.valueChangedHandler = nil
+            controller.microGamepad?.dpad.valueChangedHandler = nil
+            controller.microGamepad?.dpad.up.valueChangedHandler    = nil
+            controller.microGamepad?.dpad.down.valueChangedHandler  = nil
+            controller.microGamepad?.dpad.left.valueChangedHandler  = nil
+            controller.microGamepad?.dpad.right.valueChangedHandler = nil
+        }
+        gcVector = .zero
+        gcBtnUp = false; gcBtnDown = false; gcBtnLeft = false; gcBtnRight = false
     }
 }
     private struct AppleSiliconCoreProfile {

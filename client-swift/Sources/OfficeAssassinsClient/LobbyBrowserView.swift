@@ -9,6 +9,23 @@ struct LobbyBrowserView: View {
     
     @State private var newLobbyName: String = ""
     @State private var showingCreateForm = false
+    #if os(tvOS)
+    private enum TVFocusTarget: Hashable {
+        case refresh
+        case joinLobby(UInt64)
+        case quickDeploy
+        case openCreate
+        case back
+        case createName
+        case createCancel
+        case createSubmit
+    }
+    @FocusState private var tvFocus: TVFocusTarget?
+    #endif
+
+    private var trimmedLobbyName: String {
+        newLobbyName.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var body: some View {
         ZStack {
@@ -38,6 +55,9 @@ struct LobbyBrowserView: View {
                     }
                     .buttonStyle(PixelButtonStyle())
                     .disabled(!vm.isConnected)
+                    #if os(tvOS)
+                    .focused($tvFocus, equals: .refresh)
+                    #endif
                 }
 
                 if showingCreateForm {
@@ -58,23 +78,30 @@ struct LobbyBrowserView: View {
                             .background(Color.white.opacity(0.06))
                             .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Color.white.opacity(0.24), lineWidth: 1))
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .onSubmit { submitCreateLobby() }
+                            #if os(tvOS)
+                            .focused($tvFocus, equals: .createName)
+                            #endif
 
                         HStack(spacing: 10) {
                             Button("Cancel") {
-                                withAnimation { showingCreateForm = false }
+                                closeCreateForm()
                             }
                             .buttonStyle(PixelButtonStyle())
                             .frame(maxWidth: .infinity)
+                            #if os(tvOS)
+                            .focused($tvFocus, equals: .createCancel)
+                            #endif
 
                             Button("Create Lobby") {
-                                SoundEffects.shared.play(.enterArena)
-                                vm.isQuickJoinActive = false
-                                vm.createLobbyWithRetry(name: newLobbyName)
-                                withAnimation { showingCreateForm = false }
+                                submitCreateLobby()
                             }
                             .buttonStyle(PixelButtonStyle(filled: true))
-                            .disabled(newLobbyName.isEmpty)
+                            .disabled(trimmedLobbyName.isEmpty)
                             .frame(maxWidth: .infinity)
+                            #if os(tvOS)
+                            .focused($tvFocus, equals: .createSubmit)
+                            #endif
                         }
                     }
                     .padding(16)
@@ -134,6 +161,9 @@ struct LobbyBrowserView: View {
                                         }
                                         .buttonStyle(PixelButtonStyle(filled: !isFull))
                                         .disabled(isFull)
+                                        #if os(tvOS)
+                                        .focused($tvFocus, equals: .joinLobby(lobby.id))
+                                        #endif
                                     }
                                     .padding(.vertical, 10)
                                     .padding(.horizontal, 14)
@@ -150,8 +180,7 @@ struct LobbyBrowserView: View {
                     if !showingCreateForm {
                         HStack(spacing: 10) {
                             Button(action: {
-                                SoundEffects.shared.play(.enterArena)
-                                vm.quickJoinFirstLobbyWithRetry(waitForLobbySnapshot: true, attemptsRemaining: 6)
+                                quickDeploy()
                             }) {
                                 HStack(spacing: 6) {
                                     Image(systemName: "star.fill")
@@ -159,26 +188,27 @@ struct LobbyBrowserView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                             }
+                            #if !os(tvOS)
                             .keyboardShortcut(.defaultAction)
+                            #endif
                             .buttonStyle(PixelButtonStyle(filled: true))
                             .controlSize(.large)
                             .disabled(!vm.isConnected)
+                            #if os(tvOS)
+                            .focused($tvFocus, equals: .quickDeploy)
+                            #endif
 
                             Button(action: {
-                                SoundEffects.shared.play(.buttonPress)
-                                withAnimation {
-                                    showingCreateForm = true
-                                    newLobbyName = "\(vm.myPlayer?.name ?? "Player")'s Lobby"
-                                }
-                                if !vm.hasJoined {
-                                    vm.ensureIdentityRegistered(allowFallback: true)
-                                }
+                                openCreateLobbyForm()
                             }) {
                                 Text("Create")
                             }
                             .buttonStyle(PixelButtonStyle())
                             .controlSize(.large)
                             .disabled(!vm.isConnected)
+                            #if os(tvOS)
+                            .focused($tvFocus, equals: .openCreate)
+                            #endif
                         }
 
                         if vm.isConnected && !vm.hasJoined {
@@ -190,8 +220,7 @@ struct LobbyBrowserView: View {
                     }
 
                     Button(role: .destructive, action: {
-                        SoundEffects.shared.play(.buttonPress)
-                        onAction(.quit)
+                        backToTitle()
                     }) {
                         Text("Back")
                             .frame(maxWidth: .infinity)
@@ -199,6 +228,9 @@ struct LobbyBrowserView: View {
                     .buttonStyle(PixelButtonStyle(danger: true))
                     .controlSize(.large)
                     .padding(.top, showingCreateForm ? 0 : 6)
+                    #if os(tvOS)
+                    .focused($tvFocus, equals: .back)
+                    #endif
                 }
             }
             .frame(width: 480)
@@ -206,6 +238,79 @@ struct LobbyBrowserView: View {
             .padding(.vertical, 32)
             .pixelPanel()
             .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.15), radius: 18, x: 0, y: 8)
+            #if os(tvOS)
+            .focusSection()
+            #endif
+        }
+        #if os(tvOS)
+        .onAppear { DispatchQueue.main.async { setDefaultTVFocus() } }
+        .onChange(of: showingCreateForm) { _, showing in
+            if showing {
+                DispatchQueue.main.async { tvFocus = .createName }
+            } else {
+                DispatchQueue.main.async { setDefaultTVFocus() }
+            }
+        }
+        .onPlayPauseCommand {
+            if showingCreateForm {
+                submitCreateLobby()
+            } else {
+                quickDeploy()
+            }
+        }
+        .onExitCommand {
+            if showingCreateForm {
+                closeCreateForm()
+            } else {
+                backToTitle()
+            }
+        }
+        #endif
+    }
+
+    private func quickDeploy() {
+        guard vm.isConnected else { return }
+        SoundEffects.shared.play(.enterArena)
+        vm.quickJoinFirstLobbyWithRetry(waitForLobbySnapshot: true, attemptsRemaining: 6)
+    }
+
+    private func openCreateLobbyForm() {
+        guard vm.isConnected else { return }
+        SoundEffects.shared.play(.buttonPress)
+        withAnimation {
+            showingCreateForm = true
+            newLobbyName = "\(vm.myPlayer?.name ?? "Player")'s Lobby"
+        }
+        if !vm.hasJoined {
+            vm.ensureIdentityRegistered(allowFallback: true)
         }
     }
+
+    private func closeCreateForm() {
+        withAnimation { showingCreateForm = false }
+    }
+
+    private func submitCreateLobby() {
+        guard !trimmedLobbyName.isEmpty else {
+            #if os(tvOS)
+            tvFocus = .createName
+            #endif
+            return
+        }
+        SoundEffects.shared.play(.enterArena)
+        vm.isQuickJoinActive = false
+        vm.createLobbyWithRetry(name: trimmedLobbyName)
+        closeCreateForm()
+    }
+
+    private func backToTitle() {
+        SoundEffects.shared.play(.buttonPress)
+        onAction(.quit)
+    }
+
+    #if os(tvOS)
+    private func setDefaultTVFocus() {
+        tvFocus = showingCreateForm ? .createName : .quickDeploy
+    }
+    #endif
 }

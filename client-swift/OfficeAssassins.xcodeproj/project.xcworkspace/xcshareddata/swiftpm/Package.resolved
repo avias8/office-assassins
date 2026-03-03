@@ -1,0 +1,15 @@
+{
+  "originHash" : "0b3a198458d99ae175e74eebd0d7381d7907379020e264b0385ead50dd4e1019",
+  "pins" : [
+    {
+      "identity" : "spacetimedb-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/avias8/spacetimedb-swift.git",
+      "state" : {
+        "revision" : "96a6a9e01824bd01d666e35add2dbc93f45fdf86",
+        "version" : "0.21.0"
+      }
+    }
+  ],
+  "version" : 3
+}

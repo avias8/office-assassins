@@ -1,19 +1,37 @@
 import SwiftUI
 
-// MARK: - Theme
+// MARK: - Theme (Old-School Flash Game)
 
 enum SurvivorsTheme {
-    static let accent = Color(red: 0.05, green: 0.81, blue: 0.73)
-    static let accentSecondary = Color(red: 0.98, green: 0.78, blue: 0.18)
-    static let danger = Color(red: 1.0, green: 0.33, blue: 0.36)
-    static let panelStroke = Color.white.opacity(0.20)
-    static let panelFill = Color(red: 0.04, green: 0.08, blue: 0.14).opacity(0.84)
-    static let backdropTop = Color(red: 0.03, green: 0.11, blue: 0.20)
-    static let backdropBottom = Color(red: 0.03, green: 0.06, blue: 0.11)
-    static let backdropGlow = Color(red: 0.04, green: 0.86, blue: 0.76).opacity(0.30)
-    static let backdropGlowSecondary = Color(red: 0.99, green: 0.63, blue: 0.22).opacity(0.18)
-    static let textPrimary = Color(red: 0.92, green: 0.96, blue: 1.0)
-    static let textMuted = Color(white: 0.62)
+    // Primary palette – free-to-play flash arena.
+    static let accent = Color(red: 1.00, green: 0.42, blue: 0.10)         // Electric orange
+    static let accentSecondary = Color(red: 0.15, green: 0.92, blue: 0.85) // Neon cyan
+    static let warning = Color(red: 1.00, green: 0.84, blue: 0.10)        // Prize yellow
+    static let danger = Color(red: 1.00, green: 0.23, blue: 0.30)
+
+    // Surface / chrome
+    static let panelStroke = Color(red: 0.96, green: 0.39, blue: 0.20).opacity(0.75)
+    static let panelFill = Color(red: 0.02, green: 0.06, blue: 0.12).opacity(0.94)
+    static let panelFillSecondary = Color(red: 0.03, green: 0.10, blue: 0.18).opacity(0.94)
+    static let cardFill = Color(red: 0.08, green: 0.14, blue: 0.23)
+    static let cardSelected = accent.opacity(0.24)
+
+    // Background accents
+    static let backdropTop = Color(red: 0.04, green: 0.08, blue: 0.16)
+    static let backdropBottom = Color(red: 0.02, green: 0.03, blue: 0.08)
+    static let backdropGlow = accent.opacity(0.12)
+    static let backdropGlowSecondary = accentSecondary.opacity(0.10)
+
+    // Typography
+    static let textPrimary = Color(red: 0.96, green: 0.98, blue: 1.00)
+    static let textMuted = Color(red: 0.51, green: 0.66, blue: 0.78)
+
+    static let borderWeight: CGFloat = 2.5
+
+    // Fonts – chunky, bold, arcade-like
+    static func heavy(_ size: CGFloat) -> Font { .system(size: size, weight: .black, design: .rounded) }
+    static func demiBold(_ size: CGFloat) -> Font { .system(size: size, weight: .bold, design: .rounded) }
+    static func medium(_ size: CGFloat) -> Font { .system(size: size, weight: .semibold, design: .rounded) }
 }
 
 // MARK: - Shared UI Style
@@ -21,11 +39,22 @@ enum SurvivorsTheme {
 extension View {
     func pixelPanel() -> some View {
         background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(SurvivorsTheme.panelFill)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [SurvivorsTheme.panelFillSecondary, SurvivorsTheme.panelFill],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .strokeBorder(SurvivorsTheme.panelStroke, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(SurvivorsTheme.panelStroke, lineWidth: SurvivorsTheme.borderWeight)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
+                        .padding(2)
                 )
         )
     }
@@ -37,7 +66,51 @@ extension View {
     func survivorsShadow() -> some View {
         shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
     }
+
+    @ViewBuilder
+    func tvFocusableTile(
+        cornerRadius: CGFloat = 10,
+        focusedScale: CGFloat = 1.05,
+        focusTint: Color = SurvivorsTheme.accentSecondary
+    ) -> some View {
+        #if os(tvOS)
+        modifier(
+            TVFocusableTileModifier(
+                cornerRadius: cornerRadius,
+                focusedScale: focusedScale,
+                focusTint: focusTint
+            )
+        )
+        #else
+        self
+        #endif
+    }
 }
+
+#if os(tvOS)
+private struct TVFocusableTileModifier: ViewModifier {
+    let cornerRadius: CGFloat
+    let focusedScale: CGFloat
+    let focusTint: Color
+
+    @Environment(\.isFocused) private var isFocused
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(focusTint.opacity(isFocused ? 0.95 : 0), lineWidth: 3)
+                    .padding(-3)
+            }
+            .shadow(
+                color: isFocused ? focusTint.opacity(0.75) : .clear,
+                radius: isFocused ? 20 : 0
+            )
+            .scaleEffect(isFocused ? focusedScale : 1.0)
+            .animation(.easeOut(duration: 0.15), value: isFocused)
+    }
+}
+#endif
 
 // MARK: - Button Style
 
@@ -47,63 +120,90 @@ struct PixelButtonStyle: ButtonStyle {
     var accentColor: Color = SurvivorsTheme.accent
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.custom("AvenirNextCondensed-DemiBold", size: 14))
-            .padding(.horizontal, 15)
-            .padding(.vertical, 10)
-            .foregroundStyle(fgColor)
-            .background {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(bgColor(configuration.isPressed))
-                    .overlay(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.16), .clear],
-                            startPoint: .top,
-                            endPoint: .bottom
+        // Inner view so @Environment(\.isFocused) works (tvOS focus engine)
+        Inner(configuration: configuration, filled: filled, danger: danger, accentColor: accentColor)
+    }
+
+    private struct Inner: View {
+        let configuration: Configuration
+        let filled: Bool
+        let danger: Bool
+        let accentColor: Color
+        @Environment(\.isFocused) private var isFocused
+
+        var body: some View {
+            configuration.label
+                .font(.custom("AvenirNextCondensed-DemiBold", size: 14))
+                .tracking(0.3)
+                .padding(.horizontal, 15)
+                .padding(.vertical, 10)
+                .foregroundStyle(fgColor)
+                .background {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(bgColor(configuration.isPressed))
+                        .overlay(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.28), .clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         )
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    )
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(borderColor, lineWidth: 1)
-            }
-            .shadow(color: Color.black.opacity(configuration.isPressed ? 0.10 : 0.26), radius: 8, x: 0, y: 3)
-            .scaleEffect(configuration.isPressed ? 0.978 : 1.0)
-            .animation(.easeInOut(duration: 0.10), value: configuration.isPressed)
-    }
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(focusBorderColor, lineWidth: isFocused ? 3 : 1.8)
+                }
+                .overlay(alignment: .bottom) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color.black.opacity(configuration.isPressed ? 0.0 : 0.28))
+                        .frame(height: 5)
+                        .padding(.horizontal, 2)
+                        .offset(y: 3)
+                        .blur(radius: 0.4)
+                }
+                .shadow(
+                    color: isFocused
+                        ? focusGlowColor.opacity(0.75)
+                        : Color.black.opacity(configuration.isPressed ? 0.08 : 0.28),
+                    radius: isFocused ? 18 : 7,
+                    x: 0, y: isFocused ? 0 : 4
+                )
+                .scaleEffect(configuration.isPressed ? 0.97 : (isFocused ? 1.04 : 1.0))
+                .animation(.easeInOut(duration: 0.10), value: configuration.isPressed)
+                .animation(.easeOut(duration: 0.15), value: isFocused)
+        }
 
-    private var fgColor: Color {
-        if danger && filled {
-            return .white
+        private var fgColor: Color {
+            if danger && filled { return .white }
+            if danger { return SurvivorsTheme.danger }
+            return filled ? Color(red: 0.02, green: 0.08, blue: 0.10) : SurvivorsTheme.textPrimary
         }
-        if danger {
-            return SurvivorsTheme.danger
-        }
-        return filled ? Color(red: 0.02, green: 0.08, blue: 0.10) : SurvivorsTheme.textPrimary
-    }
 
-    private func bgColor(_ pressed: Bool) -> Color {
-        if danger && filled {
-            return SurvivorsTheme.danger.opacity(pressed ? 0.80 : 0.98)
+        private func bgColor(_ pressed: Bool) -> Color {
+            if danger && filled { return SurvivorsTheme.danger.opacity(pressed ? 0.80 : 0.98) }
+            if danger { return SurvivorsTheme.danger.opacity(pressed ? 0.22 : 0.12) }
+            if filled { return accentColor.opacity(pressed ? 0.82 : 0.98) }
+            return Color(red: 0.07, green: 0.16, blue: 0.28).opacity(pressed ? 0.82 : 0.68)
         }
-        if danger {
-            return SurvivorsTheme.danger.opacity(pressed ? 0.22 : 0.12)
-        }
-        if filled {
-            return accentColor.opacity(pressed ? 0.82 : 0.98)
-        }
-        return Color(red: 0.08, green: 0.14, blue: 0.22).opacity(pressed ? 0.70 : 0.56)
-    }
 
-    private var borderColor: Color {
-        if danger {
-            return SurvivorsTheme.danger.opacity(0.88)
+        private var borderColor: Color {
+            if danger { return SurvivorsTheme.danger.opacity(0.88) }
+            if filled { return accentColor.opacity(0.94) }
+            return Color.white.opacity(0.34)
         }
-        if filled {
-            return accentColor.opacity(0.94)
+
+        // When focused on tvOS, use a brighter/accent border
+        private var focusBorderColor: Color {
+            guard isFocused else { return borderColor }
+            if danger { return SurvivorsTheme.danger }
+            return filled ? accentColor : SurvivorsTheme.accent
         }
-        return Color.white.opacity(0.34)
+
+        private var focusGlowColor: Color {
+            if danger { return SurvivorsTheme.danger }
+            return accentColor
+        }
     }
 }
 
@@ -130,7 +230,7 @@ struct SurvivorsPanelBackground: View {
             shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous),
             fallbackMaterial: .ultraThinMaterial,
             stroke: SurvivorsTheme.panelStroke,
-            lineWidth: 1,
+            lineWidth: SurvivorsTheme.borderWeight,
             usesLiquidGlass: false
         )
     }
@@ -154,7 +254,7 @@ struct SurvivorsShapeSurface<S: InsettableShape>: View {
 
     @ViewBuilder
     private var liquidOrFallback: some View {
-        if usesLiquidGlass, #available(macOS 26.0, iOS 26.0, *) {
+        if usesLiquidGlass, #available(macOS 26.0, iOS 26.0, tvOS 26.0, *) {
             shape
                 .fill(.clear)
                 .glassEffect()
@@ -165,91 +265,47 @@ struct SurvivorsShapeSurface<S: InsettableShape>: View {
     }
 }
 
-// MARK: - Animated Backdrop
+// MARK: - Animated Backdrop (Old-School Flash)
 
 struct SurvivorsBackdrop: View {
-    // Deterministic star field using golden-ratio hashing.
-    private static let stars: [(x: Double, y: Double, sz: CGFloat, spd: Double, ph: Double)] = (0..<60).map { i in
-        let g = 0.6180339887498949
-        return (
-            x: (Double(i) * g).truncatingRemainder(dividingBy: 1.0),
-            y: (Double(i * 7 + 3) * g).truncatingRemainder(dividingBy: 1.0),
-            sz: CGFloat(1.5 + (Double(i * 13 + 7) * g).truncatingRemainder(dividingBy: 1.0) * 2.0),
-            spd: 0.4 + (Double(i * 19 + 11) * g).truncatingRemainder(dividingBy: 1.0) * 1.4,
-            ph: (Double(i * 31 + 17) * g).truncatingRemainder(dividingBy: 1.0) * .pi * 2
-        )
-    }
-
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { timeline in
-            let t = timeline.date.timeIntervalSinceReferenceDate
-            let glowAX = 0.50 + 0.28 * cos(t * 0.07)
-            let glowAY = 0.38 + 0.20 * sin(t * 0.05)
-            let glowBX = 0.52 + 0.24 * sin(t * 0.06 + 1.3)
-            let glowBY = 0.62 + 0.20 * cos(t * 0.05 + 0.8)
+        ZStack {
+            // Flat dark gradient — office-at-midnight vibe
+            LinearGradient(
+                colors: [SurvivorsTheme.backdropTop, SurvivorsTheme.backdropBottom],
+                startPoint: .top,
+                endPoint: .bottom
+            )
 
-            ZStack {
-                LinearGradient(
-                    colors: [SurvivorsTheme.backdropTop, SurvivorsTheme.backdropBottom],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+            // Subtle cross-hatch / graph-paper texture
+            Canvas { ctx, size in
+                let spacing: CGFloat = 28
+                var path = Path()
 
-                // Slow-scrolling pixel grid
-                Canvas { ctx, size in
-                    let grid: CGFloat = 64
-                    let xShift = CGFloat((t * 4).truncatingRemainder(dividingBy: Double(grid)))
-                    let yShift = CGFloat((t * 3).truncatingRemainder(dividingBy: Double(grid)))
-                    var path = Path()
-
-                    var x = -grid + xShift
-                    while x <= size.width + grid {
-                        path.move(to: CGPoint(x: x, y: 0))
-                        path.addLine(to: CGPoint(x: x, y: size.height))
-                        x += grid
-                    }
-
-                    var y = -grid + yShift
-                    while y <= size.height + grid {
-                        path.move(to: CGPoint(x: 0, y: y))
-                        path.addLine(to: CGPoint(x: size.width, y: y))
-                        y += grid
-                    }
-
-                    ctx.stroke(path, with: .color(SurvivorsTheme.accent.opacity(0.16)), lineWidth: 1)
+                var x: CGFloat = 0
+                while x <= size.width {
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
+                    x += spacing
                 }
 
-                // Twinkling pixel stars
-                Canvas { ctx, size in
-                    for star in Self.stars {
-                        let alpha = 0.15 + 0.85 * (0.5 + 0.5 * sin(t * star.spd + star.ph))
-                        let rect = CGRect(
-                            x: star.x * size.width - star.sz / 2,
-                            y: star.y * size.height - star.sz / 2,
-                            width: star.sz, height: star.sz
-                        )
-                        ctx.fill(Path(rect), with: .color(Color.white.opacity(alpha)))
-                    }
+                var y: CGFloat = 0
+                while y <= size.height {
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: size.width, y: y))
+                    y += spacing
                 }
 
-                // Teal ambient glow
-                RadialGradient(
-                    colors: [SurvivorsTheme.backdropGlow, .clear],
-                    center: UnitPoint(x: glowAX, y: glowAY),
-                    startRadius: 30,
-                    endRadius: 540
-                )
-                .blur(radius: 40)
-
-                // Gold ambient glow
-                RadialGradient(
-                    colors: [SurvivorsTheme.backdropGlowSecondary, .clear],
-                    center: UnitPoint(x: glowBX, y: glowBY),
-                    startRadius: 24,
-                    endRadius: 440
-                )
-                .blur(radius: 30)
+                ctx.stroke(path, with: .color(Color.white.opacity(0.03)), lineWidth: 1)
             }
+
+            // Warm vignette at centre – subtle
+            RadialGradient(
+                colors: [SurvivorsTheme.accent.opacity(0.06), .clear],
+                center: .center,
+                startRadius: 60,
+                endRadius: 500
+            )
         }
         .ignoresSafeArea()
     }

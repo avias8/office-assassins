@@ -18,6 +18,8 @@ fileprivate struct VisiblePlayerSnapshot: Identifiable {
     let isMoving: Bool
     let isFlashing: Bool
     let color: Color
+    let profileCGImage: CGImage?  // Game Center avatar (local player only)
+    let isLocalPlayer: Bool
 }
 
 // MARK: - Sword orbit layout
@@ -76,6 +78,7 @@ func swordPositions(count: Int, t: TimeInterval) -> [CGPoint] {
 
 struct SwiftUIGameViewport: View {
     let vm: OfficeAssassinsViewModel
+    var profileCGImage: CGImage?
     @State private var lastFrameTimestamp: TimeInterval?
     @State private var frameMs: Double = 0
     private static let showPerfHUD =
@@ -125,6 +128,7 @@ struct SwiftUIGameViewport: View {
                     ) else {
                         return nil
                     }
+                    let isLocal = player.id == vm.userId
                     return VisiblePlayerSnapshot(
                         id: player.id,
                         player: player,
@@ -134,7 +138,9 @@ struct SwiftUIGameViewport: View {
                         direction: vm.playerDirections[player.id] ?? .south,
                         isMoving: vm.playerIsMoving[player.id] ?? false,
                         isFlashing: vm.playerIsHitFlashing(player.id, at: t),
-                        color: Color.fromId(player.id)
+                        color: Color.fromId(player.id),
+                        profileCGImage: isLocal ? profileCGImage : nil,
+                        isLocalPlayer: isLocal
                     )
                 }
                 let visibleEffectsCount = showPerfHUD
@@ -282,13 +288,14 @@ private struct ProceduralWorldBackdrop: View {
     var body: some View {
         Canvas(rendersAsynchronously: true) { ctx, size in
             let bgRect = CGRect(origin: .zero, size: size)
+            
+            // Blueprint / Office floor plan background
             ctx.fill(
                 Path(bgRect),
                 with: .linearGradient(
                     Gradient(stops: [
-                        .init(color: Color(red: 0.09, green: 0.06, blue: 0.16), location: 0.0),
-                        .init(color: Color(red: 0.05, green: 0.03, blue: 0.10), location: 0.45),
-                        .init(color: Color(red: 0.02, green: 0.02, blue: 0.06), location: 1.0),
+                        .init(color: Color(red: 0.05, green: 0.12, blue: 0.22), location: 0.0), // Blueprint navy
+                        .init(color: Color(red: 0.03, green: 0.08, blue: 0.16), location: 1.0),
                     ]),
                     startPoint: CGPoint(x: size.width * 0.5, y: 0),
                     endPoint: CGPoint(x: size.width * 0.5, y: size.height)
@@ -301,59 +308,126 @@ private struct ProceduralWorldBackdrop: View {
                 width: CGFloat(worldMax - worldMin),
                 height: CGFloat(worldMax - worldMin)
             )
-            let tile: CGFloat = 32
+            let minorTile: CGFloat = 32
+            let majorTile: CGFloat = 128
             let worldViewportWidth = size.width / zoom
             let worldViewportHeight = size.height / zoom
 
-            let minTileX = Int(floor(camX / tile))
-            let maxTileX = Int(ceil((camX + worldViewportWidth) / tile))
-            let minTileY = Int(floor(camY / tile))
-            let maxTileY = Int(ceil((camY + worldViewportHeight) / tile))
+            let minMinorX = Int(floor(camX / minorTile))
+            let maxMinorX = Int(ceil((camX + worldViewportWidth) / minorTile))
+            let minMinorY = Int(floor(camY / minorTile))
+            let maxMinorY = Int(ceil((camY + worldViewportHeight) / minorTile))
+            
+            let minMajorX = Int(floor(camX / majorTile))
+            let maxMajorX = Int(ceil((camX + worldViewportWidth) / majorTile))
+            let minMajorY = Int(floor(camY / majorTile))
+            let maxMajorY = Int(ceil((camY + worldViewportHeight) / majorTile))
 
-            var lightTiles = Path()
-            for ty in minTileY...maxTileY {
-                for tx in minTileX...maxTileX where (tx + ty).isMultiple(of: 2) {
-                    let r = CGRect(
-                        x: (CGFloat(tx) * tile - camX) * zoom,
-                        y: (CGFloat(ty) * tile - camY) * zoom,
-                        width: tile * zoom,
-                        height: tile * zoom
-                    )
-                    lightTiles.addRect(r)
-                }
-            }
-            ctx.fill(lightTiles, with: .color(Color(red: 0.10, green: 0.08, blue: 0.18).opacity(0.80)))
-
+            // 1. Draw minor grid lines
             var minorGrid = Path()
+            for tx in minMinorX...maxMinorX {
+                let x = (CGFloat(tx) * minorTile - camX) * zoom
+                minorGrid.move(to: CGPoint(x: x, y: 0))
+                minorGrid.addLine(to: CGPoint(x: x, y: size.height))
+            }
+            for ty in minMinorY...maxMinorY {
+                let y = (CGFloat(ty) * minorTile - camY) * zoom
+                minorGrid.move(to: CGPoint(x: 0, y: y))
+                minorGrid.addLine(to: CGPoint(x: size.width, y: y))
+            }
+            ctx.stroke(minorGrid, with: .color(Color(red: 0.3, green: 0.6, blue: 0.9).opacity(0.12)), lineWidth: 1)
+
+            // 2. Draw major grid lines
             var majorGrid = Path()
-            for tx in minTileX...maxTileX {
-                let x = (CGFloat(tx) * tile - camX) * zoom
-                if tx.isMultiple(of: 4) {
-                    majorGrid.move(to: CGPoint(x: x, y: 0))
-                    majorGrid.addLine(to: CGPoint(x: x, y: size.height))
-                } else {
-                    minorGrid.move(to: CGPoint(x: x, y: 0))
-                    minorGrid.addLine(to: CGPoint(x: x, y: size.height))
+            var intersectionMarks = Path()
+            for tx in minMajorX...maxMajorX {
+                let x = (CGFloat(tx) * majorTile - camX) * zoom
+                majorGrid.move(to: CGPoint(x: x, y: 0))
+                majorGrid.addLine(to: CGPoint(x: x, y: size.height))
+                
+                for ty in minMajorY...maxMajorY {
+                    let y = (CGFloat(ty) * majorTile - camY) * zoom
+                    let markSize: CGFloat = 8 * zoom
+                    intersectionMarks.move(to: CGPoint(x: x - markSize, y: y))
+                    intersectionMarks.addLine(to: CGPoint(x: x + markSize, y: y))
+                    intersectionMarks.move(to: CGPoint(x: x, y: y - markSize))
+                    intersectionMarks.addLine(to: CGPoint(x: x, y: y + markSize))
                 }
             }
-            for ty in minTileY...maxTileY {
-                let y = (CGFloat(ty) * tile - camY) * zoom
-                if ty.isMultiple(of: 4) {
-                    majorGrid.move(to: CGPoint(x: 0, y: y))
-                    majorGrid.addLine(to: CGPoint(x: size.width, y: y))
-                } else {
-                    minorGrid.move(to: CGPoint(x: 0, y: y))
-                    minorGrid.addLine(to: CGPoint(x: size.width, y: y))
+            for ty in minMajorY...maxMajorY {
+                let y = (CGFloat(ty) * majorTile - camY) * zoom
+                majorGrid.move(to: CGPoint(x: 0, y: y))
+                majorGrid.addLine(to: CGPoint(x: size.width, y: y))
+            }
+            ctx.stroke(majorGrid, with: .color(Color(red: 0.4, green: 0.7, blue: 1.0).opacity(0.25)), lineWidth: 1.5)
+            ctx.stroke(intersectionMarks, with: .color(Color(red: 0.6, green: 0.85, blue: 1.0).opacity(0.5)), lineWidth: 1.5)
+
+            // 3. Draw architectural floor plan modules
+            var officeRooms = Path()
+            var officeFills = Path()
+            var desks = Path()
+            
+            let roomScale: CGFloat = 256
+            let minRoomX = Int(floor(camX / roomScale))
+            let maxRoomX = Int(ceil((camX + worldViewportWidth) / roomScale))
+            let minRoomY = Int(floor(camY / roomScale))
+            let maxRoomY = Int(ceil((camY + worldViewportHeight) / roomScale))
+            
+            for rx in minRoomX...maxRoomX {
+                for ry in minRoomY...maxRoomY {
+                    // Simple deterministic layout based on coordinate
+                    let seed = abs(rx * 997 + ry * 331 + rx * ry * 11) % 100
+                    let roomX0 = (CGFloat(rx) * roomScale - camX) * zoom
+                    let roomY0 = (CGFloat(ry) * roomScale - camY) * zoom
+                    let scaledRoom = roomScale * zoom
+                    
+                    // Procedural dividers (skip some to make hallways)
+                    if seed % 4 != 0 {
+                        officeRooms.move(to: CGPoint(x: roomX0, y: roomY0))
+                        officeRooms.addLine(to: CGPoint(x: roomX0 + scaledRoom * 0.3, y: roomY0))
+                        officeRooms.move(to: CGPoint(x: roomX0 + scaledRoom * 0.7, y: roomY0))
+                        officeRooms.addLine(to: CGPoint(x: roomX0 + scaledRoom, y: roomY0))
+                    }
+                    if seed % 3 != 0 {
+                        officeRooms.move(to: CGPoint(x: roomX0, y: roomY0))
+                        officeRooms.addLine(to: CGPoint(x: roomX0, y: roomY0 + scaledRoom * 0.3))
+                        officeRooms.move(to: CGPoint(x: roomX0, y: roomY0 + scaledRoom * 0.7))
+                        officeRooms.addLine(to: CGPoint(x: roomX0, y: roomY0 + scaledRoom))
+                    }
+                    
+                    // Desks inside the rooms depending on layout type
+                    let deskW = 48 * zoom
+                    let deskH = 24 * zoom
+                    
+                    let layoutType = seed % 5
+                    if layoutType == 0 {
+                        // 2x2 Cubicles
+                        desks.addRect(CGRect(x: roomX0 + 64 * zoom, y: roomY0 + 64 * zoom, width: deskW, height: deskH))
+                        desks.addRect(CGRect(x: roomX0 + 144 * zoom, y: roomY0 + 64 * zoom, width: deskW, height: deskH))
+                        desks.addRect(CGRect(x: roomX0 + 64 * zoom, y: roomY0 + 96 * zoom, width: deskW, height: deskH))
+                        desks.addRect(CGRect(x: roomX0 + 144 * zoom, y: roomY0 + 96 * zoom, width: deskW, height: deskH))
+                        officeFills.addRect(CGRect(x: roomX0 + 32 * zoom, y: roomY0 + 32 * zoom, width: 192 * zoom, height: 128 * zoom))
+                    } else if layoutType == 1 {
+                        // Single executive desk
+                        desks.addRect(CGRect(x: roomX0 + 80 * zoom, y: roomY0 + 96 * zoom, width: 96 * zoom, height: 32 * zoom))
+                        officeFills.addRect(CGRect(x: roomX0 + 32 * zoom, y: roomY0 + 32 * zoom, width: 192 * zoom, height: 128 * zoom))
+                    } else if layoutType == 2 {
+                        // Meeting room / Round table
+                        desks.addEllipse(in: CGRect(x: roomX0 + 80 * zoom, y: roomY0 + 80 * zoom, width: 96 * zoom, height: 64 * zoom))
+                    }
                 }
             }
-            ctx.stroke(minorGrid, with: .color(Color(red: 0.18, green: 0.14, blue: 0.30).opacity(0.42)), lineWidth: 1)
-            ctx.stroke(majorGrid, with: .color(Color(red: 0.28, green: 0.24, blue: 0.44).opacity(0.65)), lineWidth: 1.5)
+            
+            ctx.fill(officeFills, with: .color(Color(red: 0.15, green: 0.35, blue: 0.65).opacity(0.1)))
+            ctx.fill(desks, with: .color(Color(red: 0.3, green: 0.5, blue: 0.8).opacity(0.15)))
+            ctx.stroke(desks, with: .color(Color(red: 0.65, green: 0.85, blue: 1.0).opacity(0.6)), lineWidth: 1.5)
+            ctx.stroke(officeRooms, with: .color(Color(red: 0.7, green: 0.9, blue: 1.0).opacity(0.8)), lineWidth: 3)
 
             ctx.fill(
                 Path(bgRect),
                 with: .radialGradient(
                     Gradient(stops: [
-                        .init(color: Color(red: 0.30, green: 0.20, blue: 0.45).opacity(0.20), location: 0.0),
+                        .init(color: Color(red: 0.35, green: 0.65, blue: 0.95).opacity(0.12), location: 0.0),
                         .init(color: .clear, location: 1.0),
                     ]),
                     center: CGPoint(x: size.width * 0.5, y: size.height * 0.44),
@@ -423,7 +497,8 @@ private struct GameEntitiesCanvas: View {
                     scale: zoom,
                     model: snapshot.model,
                     baseColor: snapshot.color,
-                    lowHealth: snapshot.player.health < 33
+                    lowHealth: snapshot.player.health < 33,
+                    profileCGImage: snapshot.profileCGImage
                 )
                 if snapshot.player.weaponCount > 0 {
                     forEachSwordPosition(count: Int(snapshot.player.weaponCount), t: t) { offset in
@@ -454,8 +529,10 @@ private struct GameEntitiesCanvas: View {
         scale: CGFloat,
         model: OfficeAssassinsViewModel.PlayerModel,
         baseColor: Color,
-        lowHealth: Bool
+        lowHealth: Bool,
+        profileCGImage: CGImage?
     ) {
+        // Draw standard model
         switch model {
         case .operatorLite:
             drawOperatorLite(
@@ -492,6 +569,24 @@ private struct GameEntitiesCanvas: View {
                 baseColor: baseColor,
                 lowHealth: lowHealth
             )
+        }
+        
+        // If we have a Game Center profile image, overlay it like a TV head
+        if let profileCGImage {
+            let picSize = 24 * scale
+            // Position above the head or center of the body based on scale
+            let picRect = CGRect(x: center.x - picSize/2, y: center.y - 18 * scale - picSize/2, width: picSize, height: picSize)
+            
+            // Draw a tiny TV border
+            let tvRect = picRect.insetBy(dx: -3 * scale, dy: -3 * scale)
+            ctx.fill(Path(roundedRect: tvRect, cornerSize: CGSize(width: 4 * scale, height: 4 * scale)), with: .color(Color(red: 0.1, green: 0.1, blue: 0.2)))
+            ctx.stroke(Path(roundedRect: tvRect, cornerSize: CGSize(width: 4 * scale, height: 4 * scale)), with: .color(baseColor), lineWidth: 2 * scale)
+
+            // Draw the profile image
+            var imgCtx = ctx
+            let path = Path(roundedRect: picRect, cornerSize: CGSize(width: 2 * scale, height: 2 * scale))
+            imgCtx.clip(to: path)
+            imgCtx.draw(Image(profileCGImage, scale: 1.0, orientation: .up, label: Text("")), in: picRect)
         }
     }
 

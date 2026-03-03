@@ -210,7 +210,7 @@ final class MusicPlayer {
 
     private func makePlayer(resource: String, exts: [String]) -> AVAudioPlayer? {
         for ext in exts {
-            guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else { continue }
+            guard let url = Bundle.resourceBundle.url(forResource: resource, withExtension: ext) else { continue }
             let player = try? AVAudioPlayer(contentsOf: url)
             player?.numberOfLoops = -1
             player?.prepareToPlay()
@@ -230,8 +230,11 @@ final class MusicPlayer {
             object: AVAudioSession.sharedInstance(),
             queue: .main
         ) { [weak self] notification in
+            let info = notification.userInfo
+            let rawType = info?[AVAudioSessionInterruptionTypeKey] as? UInt
+            let rawOptions = info?[AVAudioSessionInterruptionOptionKey] as? UInt
             Task { @MainActor [weak self] in
-                self?.handleAudioInterruption(notification)
+                self?.handleAudioInterruption(rawType: rawType, rawOptions: rawOptions)
             }
         }
         routeChangeObserver = NotificationCenter.default.addObserver(
@@ -258,9 +261,8 @@ final class MusicPlayer {
         }
     }
 
-    private func handleAudioInterruption(_ notification: Notification) {
-        guard let info = notification.userInfo,
-              let rawType = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+    private func handleAudioInterruption(rawType: UInt?, rawOptions: UInt?) {
+        guard let rawType,
               let type = AVAudioSession.InterruptionType(rawValue: rawType) else {
             return
         }
@@ -279,7 +281,7 @@ final class MusicPlayer {
             titlePlayer?.pause()
             gamePlayer?.pause()
         case .ended:
-            let shouldResume = (info[AVAudioSessionInterruptionOptionKey] as? UInt)
+            let shouldResume = rawOptions
                 .map { AVAudioSession.InterruptionOptions(rawValue: $0).contains(.shouldResume) } ?? false
             isInterrupted = false
             if shouldResume {
@@ -714,8 +716,11 @@ final class SoundEffects {
             object: AVAudioSession.sharedInstance(),
             queue: .main
         ) { [weak self] note in
+            let info = note.userInfo
+            let rawType = info?[AVAudioSessionInterruptionTypeKey] as? UInt
+            let rawOptions = info?[AVAudioSessionInterruptionOptionKey] as? UInt
             Task { @MainActor [weak self] in
-                self?.handleInterruption(note)
+                self?.handleInterruption(rawType: rawType, rawOptions: rawOptions)
             }
         }
         routeChangeObserver = NotificationCenter.default.addObserver(
@@ -743,9 +748,8 @@ final class SoundEffects {
         }
     }
 
-    private func handleInterruption(_ notification: Notification) {
-        guard let info = notification.userInfo,
-              let rawType = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+    private func handleInterruption(rawType: UInt?, rawOptions: UInt?) {
+        guard let rawType,
               let type = AVAudioSession.InterruptionType(rawValue: rawType) else {
             return
         }
@@ -757,7 +761,7 @@ final class SoundEffects {
                 engine.pause()
             }
         case .ended:
-            let shouldResume = (info[AVAudioSessionInterruptionOptionKey] as? UInt)
+            let shouldResume = rawOptions
                 .map { AVAudioSession.InterruptionOptions(rawValue: $0).contains(.shouldResume) } ?? false
             isEngineInterrupted = false
             if shouldResume {

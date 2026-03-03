@@ -43,12 +43,24 @@ public struct OfficeAssassinsView: View {
     var onMuteToggle: (() -> Void)?
     var isMuted: Bool
     var isBackground: Bool
+    var profileCGImage: CGImage?
+    #if os(tvOS)
+    private enum TVFocusTarget: Hashable {
+        case respawn
+        case continueButton
+        case deployBot
+        case leaveLobby
+        case returnToTitle
+    }
+    @FocusState private var tvFocus: TVFocusTarget?
+    #endif
 
     /// Pass a name to auto-join immediately on appear.
     public init(
         isBackground: Bool = false, 
         initialName: String? = nil, 
         isMuted: Bool = false, 
+        profileCGImage: CGImage? = nil,
         injectedVM: OfficeAssassinsViewModel? = nil,
         onMuteToggle: (() -> Void)? = nil, 
         onExit: ((ExitAction) -> Void)? = nil, 
@@ -63,6 +75,7 @@ public struct OfficeAssassinsView: View {
         }
         self.isBackground = isBackground
         self.isMuted = isMuted
+        self.profileCGImage = profileCGImage
         self.onMuteToggle = onMuteToggle
         self.onExit = onExit
         self.onMusicChange = onMusicChange
@@ -74,10 +87,10 @@ public struct OfficeAssassinsView: View {
 
     public var body: some View {
         ZStack {
-            // Game Area — camera follows local player
+            // Game canvas — edge-to-edge, camera follows local player
             GeometryReader { _ in
                 ZStack {
-                    SwiftUIGameViewport(vm: vm)
+                    SwiftUIGameViewport(vm: vm, profileCGImage: profileCGImage)
                         .background(
                             LinearGradient(
                                 colors: [SurvivorsTheme.backdropBottom, SurvivorsTheme.backdropTop],
@@ -87,7 +100,7 @@ public struct OfficeAssassinsView: View {
                         )
                         .clipped()
 
-                    #if !os(macOS)
+                    #if os(iOS)
                     if let base = vm.jsBase {
                         ZStack {
                             Circle()
@@ -102,34 +115,9 @@ public struct OfficeAssassinsView: View {
                     }
                     #endif
                 }
-
-                // HUD Layer Overlay
-                VStack(spacing: 0) {
-                    if !isBackground {
-                        statusBar
-                            .padding(.top, 12)
-                            .padding(.horizontal, 16)
-                    }
-
-                    HStack {
-                        if !isBackground {
-                            EventFeedView(events: vm.recentEvents)
-                                .padding(.top, 12)
-                                .padding(.leading, 12)
-                        }
-                        Spacer()
-                    }
-
-                    Spacer()
-
-                    if !isBackground {
-                        playingFooter
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 12)
-                    }
-                }
             }
-            #if !os(macOS)
+            .ignoresSafeArea()
+            #if os(iOS)
             .gesture(
                 DragGesture(minimumDistance: 5)
                     .onChanged { val in
@@ -140,43 +128,56 @@ public struct OfficeAssassinsView: View {
                     }
             )
             #endif
+
+            // HUD overlay — sibling layer above canvas, respects safe area naturally
+            if !isBackground {
+                VStack(spacing: 0) {
+                    gameHud
+                        .padding(.top, 12)
+                        .padding(.horizontal, 16)
+                    Spacer()
+                    HStack {
+                        EventFeedView(events: vm.recentEvents)
+                            .padding(.bottom, 16)
+                            .padding(.leading, 16)
+                        Spacer()
+                    }
+                }
+            }
         }
         .grayscale(vm.isDead ? 1.0 : 0.0) // B&W effect when dead
         .overlay {
             if !isBackground && vm.isDead {
                 ZStack {
-                    Color.black.opacity(0.35)
-                        .ignoresSafeArea()
-
-                    VStack(spacing: 16) {
-                        Text("Eliminated")
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
-                            .foregroundStyle(Color(red: 1.0, green: 0.35, blue: 0.35))
-
-                        Text("Wait for an opening, then rejoin.")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(Color(white: 0.45))
-                            .multilineTextAlignment(.center)
-
+                    Color.black.opacity(0.5).ignoresSafeArea()
+                    VStack(spacing: 28) {
+                        VStack(spacing: 8) {
+                            Text("Eliminated")
+                                .font(.system(size: 44, weight: .black, design: .rounded))
+                                .foregroundStyle(SurvivorsTheme.danger)
+                            Text("Prepare for round 2.")
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.45))
+                        }
                         Button(action: {
-                            Respawn.invoke()
-                            vm.isMenuOpen = false
-                            SoundEffects.shared.play(.respawn)
+                            respawn()
                         }) {
-                            HStack(spacing: 6) {
+                            HStack(spacing: 8) {
                                 Image(systemName: "arrow.clockwise")
                                 Text("Respawn")
                             }
-                            .frame(maxWidth: .infinity)
+                            .frame(width: 240)
                         }
                         .buttonStyle(PixelButtonStyle(filled: true))
                         .controlSize(.large)
+                        #if os(tvOS)
+                        .focused($tvFocus, equals: .respawn)
+                        #endif
                     }
-                    .frame(width: 340)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 18)
-                    .pixelPanel()
-                    .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.20), radius: 24, x: 0, y: 8)
+                    .padding(44)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .strokeBorder(SurvivorsTheme.danger.opacity(0.3), lineWidth: 1))
                 }
                 .transition(.opacity)
                 .ignoresSafeArea()
@@ -187,260 +188,155 @@ public struct OfficeAssassinsView: View {
                 ZStack {
                     Color.black.opacity(0.45)
                         .ignoresSafeArea()
+                        #if !os(tvOS)
                         .onTapGesture {
                             SoundEffects.shared.play(.menuClose)
                             showingResetNameDialog = false
                             vm.isMenuOpen = false
                         }
+                        #endif
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: 14) {
+                        // Header
                         HStack(alignment: .top) {
-                            VStack(alignment: .leading, spacing: 6) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text("Paused")
-                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                    .font(.system(size: 30, weight: .black, design: .rounded))
                                     .foregroundStyle(.white)
-                                Text(vm.myPlayer?.name ?? "Connected Player")
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                                    .foregroundStyle(Color(white: 0.52))
-                                Text("Choose your next move.")
-                                    .font(.system(size: 10, weight: .medium, design: .rounded))
-                                    .foregroundStyle(Color(white: 0.40))
-                            }
-                            Spacer(minLength: 12)
-                            Text("ESC • RESUME")
-                                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                .foregroundStyle(Color(white: 0.42))
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.06))
-                                .overlay(Rectangle().strokeBorder(Color(white: 0.26), lineWidth: 1))
-                        }
-
-                        ViewThatFits(in: .horizontal) {
-                            HStack(spacing: 8) {
                                 if let me = vm.myPlayer {
-                                    HudHealthMeter(health: me.health)
-                                        .frame(width: 148)
-                                    HudStatChip(label: "Kills", value: "\(me.kills)", tint: .orange)
-                                    HudStatChip(label: "Swords", value: "\(me.weaponCount)", tint: SurvivorsTheme.accent)
-                                }
-                                HudStatChip(label: "Players", value: "\(vm.players.count)", tint: .green)
-                            }
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                if let me = vm.myPlayer {
-                                    HudHealthMeter(health: me.health)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    HStack(spacing: 8) {
-                                        HudStatChip(label: "Kills", value: "\(me.kills)", tint: .orange)
-                                        HudStatChip(label: "Swords", value: "\(me.weaponCount)", tint: SurvivorsTheme.accent)
-                                        HudStatChip(label: "Players", value: "\(vm.players.count)", tint: .green)
-                                    }
-                                } else {
-                                    HudStatChip(label: "Players", value: "\(vm.players.count)", tint: .green)
+                                    Text(me.name)
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.5))
                                 }
                             }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("SESSION")
-                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(Color(white: 0.44))
-                                Spacer()
-                            }
-
-                            if let lobby = vm.myLobby {
-                                let count = vm.playerCount(forLobbyId: lobby.id)
-                                let maxCount = OfficeAssassinsViewModel.maxPlayersPerLobby
-                                HStack(alignment: .firstTextBaseline) {
-                                    Text(lobby.name)
-                                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                        .foregroundStyle(.white)
-                                        .lineLimit(1)
-                                    Spacer(minLength: 8)
-                                    Text("ID #\(lobby.id)")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                        .foregroundStyle(Color(white: 0.42))
-                                }
-
-                                HStack(spacing: 8) {
-                                    Text("\(count)/\(maxCount) players")
-                                    Text("·")
-                                    Text(lobby.isPlaying ? "Playing" : "Waiting")
-                                }
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .foregroundStyle(count >= maxCount ? .red : Color(white: 0.50))
-                            } else {
-                                Text("NO ACTIVE LOBBY")
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color(white: 0.40))
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(10)
-                        .background(Color.white.opacity(0.06))
-                        .overlay(Rectangle().strokeBorder(Color(red: 0.55, green: 0.82, blue: 1.0).opacity(0.26), lineWidth: 2))
-
-                        ViewThatFits(in: .horizontal) {
-                            HStack(spacing: 8) {
-                                Button {
-                                    SoundEffects.shared.play(.menuClose)
-                                    showingResetNameDialog = false
-                                    vm.isMenuOpen = false
-                                } label: {
-                                    Label("CONTINUE", systemImage: "play.fill")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(PixelButtonStyle(filled: true))
-                                .keyboardShortcut(.defaultAction)
-
-                                Button {
-                                    SoundEffects.shared.play(.menuButton)
-                                    resetNameDraft = vm.myPlayer?.name ?? vm.initialName ?? ""
-                                    showingResetNameDialog = true
-                                } label: {
-                                    Label("EDIT NAME", systemImage: "person.text.rectangle")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(PixelButtonStyle())
-                            }
-                            .controlSize(.large)
-
-                            VStack(spacing: 8) {
-                                Button {
-                                    SoundEffects.shared.play(.menuClose)
-                                    showingResetNameDialog = false
-                                    vm.isMenuOpen = false
-                                } label: {
-                                    Label("CONTINUE", systemImage: "play.fill")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(PixelButtonStyle(filled: true))
-                                .controlSize(.large)
-                                .keyboardShortcut(.defaultAction)
-
-                                Button {
-                                    SoundEffects.shared.play(.menuButton)
-                                    resetNameDraft = vm.myPlayer?.name ?? vm.initialName ?? ""
-                                    showingResetNameDialog = true
-                                } label: {
-                                    Label("EDIT NAME", systemImage: "person.text.rectangle")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(PixelButtonStyle())
-                                .controlSize(.regular)
-                            }
-                        }
-
-                        HStack {
-                            Text("DANGER")
-                                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                .foregroundStyle(Color(red: 1.0, green: 0.45, blue: 0.45))
                             Spacer()
+                            if let me = vm.myPlayer {
+                                HudHealthMeter(health: me.health)
+                                    .frame(width: 160)
+                            }
                         }
 
-                        HStack(spacing: 8) {
-                            Button(role: .destructive) {
-                                SoundEffects.shared.play(.menuButton)
-                                LeaveLobby.invoke()
-                                showingResetNameDialog = false
-                                vm.isMenuOpen = false
-                            } label: {
-                                Label("LEAVE LOBBY", systemImage: "rectangle.portrait.and.arrow.right")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(PixelButtonStyle(danger: true))
-                            .controlSize(.regular)
-                            .disabled(vm.myLobby == nil)
+                        Divider().background(Color.white.opacity(0.12))
 
-                            Button(role: .destructive) {
-                                SoundEffects.shared.play(.menuButton)
-                                EndMatch.invoke()
-                                showingResetNameDialog = false
-                                vm.isMenuOpen = false
-                            } label: {
-                                Label("END MATCH", systemImage: "flag.checkered")
-                                    .frame(maxWidth: .infinity)
+                        MenuButton(title: "Continue", systemImage: "play.fill") {
+                            closePauseMenu()
+                        }
+                        #if os(tvOS)
+                        .focused($tvFocus, equals: .continueButton)
+                        #endif
+                        #if !os(tvOS)
+                        .keyboardShortcut(.defaultAction)
+                        #endif
+
+                        if vm.isPlaying {
+                            MenuButton(title: "Deploy Rival Bot", systemImage: "figure.2.and.child.holdinghands") {
+                                deployRivalBot()
                             }
-                            .buttonStyle(PixelButtonStyle(danger: true))
-                            .controlSize(.regular)
-                            .disabled(!vm.isPlaying)
+                            #if os(tvOS)
+                            .focused($tvFocus, equals: .deployBot)
+                            #endif
                         }
 
-                        Button(role: .destructive) {
+                        #if !os(tvOS)
+                        MenuButton(title: "Edit Name", systemImage: "person.text.rectangle") {
                             SoundEffects.shared.play(.menuButton)
-                            showingResetNameDialog = false
-                            vm.stop()
-                            onExit?(.quit)
-                        } label: {
-                            Label("RETURN TO TITLE", systemImage: "xmark.circle")
-                                .frame(maxWidth: .infinity)
+                            resetNameDraft = vm.myPlayer?.name ?? vm.initialName ?? ""
+                            showingResetNameDialog = true
                         }
-                        .buttonStyle(PixelButtonStyle(danger: true))
-                        .controlSize(.regular)
+                        #endif
 
                         if showingResetNameDialog {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Edit Name")
-                                    .font(.system(size: 12, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(.white)
-                                Text("Update your callsign without leaving this session.")
-                                    .font(.system(size: 10, weight: .medium, design: .rounded))
-                                    .foregroundStyle(Color(white: 0.44))
-
+                            VStack(alignment: .leading, spacing: 10) {
                                 TextField("NEW CALLSIGN", text: $resetNameDraft)
                                     .textFieldStyle(.plain)
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.06))
-                                    .overlay(Rectangle().strokeBorder(Color(red: 0.55, green: 0.82, blue: 1.0).opacity(0.40), lineWidth: 2))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                                     .onSubmit {
-                                        let trimmed = resetNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                                        guard !trimmed.isEmpty else { return }
+                                        let t = resetNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        guard !t.isEmpty else { return }
                                         SoundEffects.shared.play(.buttonPress)
-                                        vm.renameCurrentPlayer(to: trimmed)
+                                        vm.renameCurrentPlayer(to: t)
                                         showingResetNameDialog = false
                                     }
-
                                 HStack(spacing: 8) {
-                                    Button("Back") {
+                                    Button("Cancel") {
                                         SoundEffects.shared.play(.buttonPress)
                                         showingResetNameDialog = false
                                     }
                                     .buttonStyle(PixelButtonStyle())
-
                                     Button("Save") {
-                                        let trimmed = resetNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                                        guard !trimmed.isEmpty else { return }
+                                        let t = resetNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        guard !t.isEmpty else { return }
                                         SoundEffects.shared.play(.buttonPress)
-                                        vm.renameCurrentPlayer(to: trimmed)
+                                        vm.renameCurrentPlayer(to: t)
                                         showingResetNameDialog = false
                                     }
                                     .buttonStyle(PixelButtonStyle(filled: true))
                                     .disabled(resetNameDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                                 }
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(10)
-                            .background(Color.white.opacity(0.06))
-                            .overlay(Rectangle().strokeBorder(Color(red: 0.55, green: 0.82, blue: 1.0).opacity(0.26), lineWidth: 2))
+                            .padding(14)
+                            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
                         }
+
+                        Divider().background(Color.white.opacity(0.12))
+
+                        MenuButton(title: "Leave Lobby", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                            leaveLobbyFromPauseMenu()
+                        }
+                        .disabled(vm.myLobby == nil)
+                        #if os(tvOS)
+                        .focused($tvFocus, equals: .leaveLobby)
+                        #endif
+
+                        MenuButton(title: "Return to Title", systemImage: "xmark.circle", role: .destructive) {
+                            returnToTitle()
+                        }
+                        #if os(tvOS)
+                        .focused($tvFocus, equals: .returnToTitle)
+                        #endif
                     }
-                    .frame(maxWidth: 560)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .pixelPanel()
-                    .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.20), radius: 24, x: 0, y: 8)
+                    .frame(maxWidth: 480)
+                    .padding(28)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.10), lineWidth: 1))
+                    #if os(tvOS)
+                    .focusSection()   // tell the focus engine this section contains focusable items
+                    #endif
                 }
-                .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                .transition(.opacity.combined(with: .scale(scale: 0.97)))
             }
         }
         .animation(.spring(duration: 0.3), value: vm.isMenuOpen)
         .animation(.easeInOut(duration: 1.5), value: vm.isDead) // Smooth B&W transition
+        #if os(tvOS)
+        .onExitCommand {
+            togglePauseMenu()
+        }
+        .onPlayPauseCommand {
+            if vm.isDead {
+                respawn()
+            } else if vm.isMenuOpen {
+                closePauseMenu()
+            } else {
+                openPauseMenu()
+            }
+        }
+        .onChange(of: vm.isMenuOpen) { _, opened in
+            if opened {
+                DispatchQueue.main.async { tvFocus = .continueButton }
+            }
+        }
+        .onChange(of: vm.isDead) { _, dead in
+            if dead {
+                DispatchQueue.main.async { tvFocus = .respawn }
+            }
+        }
+        #endif
         .onChange(of: vm.hasJoined) { _, _ in onMusicChange?(isActivePlayState) }
         .onChange(of: vm.isDead) { _, _ in onMusicChange?(isActivePlayState) }
         .onChange(of: vm.isMenuOpen) { _, _ in onMusicChange?(isActivePlayState) }
@@ -470,149 +366,153 @@ public struct OfficeAssassinsView: View {
         }
     }
 
-    private var statusBar: some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func openPauseMenu() {
+        vm.isMenuOpen = true
+    }
+
+    private func closePauseMenu() {
+        SoundEffects.shared.play(.menuClose)
+        showingResetNameDialog = false
+        vm.isMenuOpen = false
+    }
+
+    private func togglePauseMenu() {
+        if vm.isMenuOpen {
+            closePauseMenu()
+        } else {
+            openPauseMenu()
+        }
+    }
+
+    private func deployRivalBot() {
+        SoundEffects.shared.play(.buttonPress)
+        SpawnTestPlayer.invoke()
+        vm.isMenuOpen = false
+    }
+
+    private func leaveLobbyFromPauseMenu() {
+        SoundEffects.shared.play(.menuButton)
+        LeaveLobby.invoke()
+        showingResetNameDialog = false
+        vm.isMenuOpen = false
+    }
+
+    private func returnToTitle() {
+        SoundEffects.shared.play(.menuButton)
+        showingResetNameDialog = false
+        vm.stop()
+        onExit?(.quit)
+    }
+
+    private func respawn() {
+        Respawn.invoke()
+        vm.isMenuOpen = false
+        SoundEffects.shared.play(.respawn)
+    }
+
+    private var gameHud: some View {
+        HStack(spacing: 12) {
+            // Left: connection dot + player name
             HStack(spacing: 8) {
-                HStack(spacing: 6) {
-                    Rectangle()
-                        .fill(vm.isConnected ? Color.green : Color.red)
-                        .frame(width: 7, height: 7)
-                    Text(vm.isConnected ? "ONLINE" : "OFFLINE")
-                        .font(.custom("AvenirNextCondensed-Heavy", size: 11))
-                        .foregroundStyle(vm.isConnected ? Color.green : Color.red)
-                }
-                .padding(.horizontal, 9)
-                .padding(.vertical, 5)
-                .background(Color.white.opacity(0.06))
-                .overlay(Rectangle().strokeBorder(Color(white: 0.28), lineWidth: 1))
-
+                Circle()
+                    .fill(vm.isConnected ? Color(red: 0.25, green: 1.0, blue: 0.45) : Color.red)
+                    #if os(tvOS)
+                    .frame(width: 14, height: 14)
+                    #else
+                    .frame(width: 10, height: 10)
+                    #endif
+                    .shadow(color: (vm.isConnected ? Color.green : Color.red).opacity(0.8), radius: 5)
                 if let me = vm.myPlayer {
-                    HStack(spacing: 5) {
-                        Text("►").foregroundStyle(SurvivorsTheme.accent)
-                        Text(me.name)
-                    }
-                    .font(.custom("AvenirNextCondensed-Heavy", size: 12))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.06))
-                    .overlay(Rectangle().strokeBorder(Color(white: 0.28), lineWidth: 1))
+                    Text(me.name)
+                        #if os(tvOS)
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        #else
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        #endif
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
                 }
+            }
+            #if os(tvOS)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 16)
+            #else
+            .padding(.horizontal, 16)
+            .padding(.vertical, 11)
+            #endif
+            .background(.ultraThinMaterial, in: Capsule())
 
-                Spacer(minLength: 8)
+            Spacer(minLength: 8)
 
+            // Center: health meter
+            if let me = vm.myPlayer {
+                HudHealthMeter(health: me.health)
+                    #if os(tvOS)
+                    .frame(width: 320)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    #else
+                    .frame(width: 200)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    #endif
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+
+            Spacer(minLength: 8)
+
+            // Right: weapon count, kill count
+            // Mute button omitted on tvOS — Siri Remote has a dedicated hardware mute button
+            HStack(spacing: 20) {
                 if let me = vm.myPlayer {
-                    HudHealthMeter(health: me.health)
-                        .frame(width: 160)
+                    statBadge(value: "\(me.weaponCount)", icon: "sparkles", color: SurvivorsTheme.accent)
+                    statBadge(value: "\(me.kills)", icon: "star.fill", color: SurvivorsTheme.warning)
                 }
-
-                HudStatChip(label: "Kills", value: "\(vm.myPlayer?.kills ?? 0)", tint: .orange)
-                HudStatChip(label: "Swords", value: "\(vm.myPlayer?.weaponCount ?? 0)", tint: SurvivorsTheme.accent)
-                HudStatChip(label: "Players", value: "\(vm.players.count)", tint: .green)
-
+                #if !os(tvOS)
                 if let onMuteToggle = onMuteToggle {
                     Button {
                         if isMuted { SoundEffects.shared.play(.muteToggle) }
                         onMuteToggle()
                     } label: {
-                        Label(isMuted ? "Muted" : "Audio", systemImage: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                            .labelStyle(.iconOnly)
-                            .frame(width: 28, height: 28)
-                            .background(Color.white.opacity(0.08))
+                        Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.75))
+                            .frame(width: 36, height: 36)
                             .contentShape(Rectangle())
-                            .overlay(Rectangle().strokeBorder(Color(white: 0.28), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .help(isMuted ? "Unmute" : "Mute")
                 }
+                #endif
             }
-
-            if !vm.connectionDetail.isEmpty {
-                Text(vm.connectionDetail)
-                    .font(.custom("AvenirNextCondensed-Medium", size: 10))
-                    .foregroundStyle(vm.isConnected ? Color(white: 0.42) : Color.red)
-                    .lineLimit(1)
-                    .padding(.horizontal, 2)
-            }
+            #if os(tvOS)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            #else
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            #endif
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(
-            Rectangle()
-                .fill(Color(red: 0.02, green: 0.08, blue: 0.14).opacity(0.95))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(SurvivorsTheme.accent.opacity(0.48), lineWidth: 2)
-                )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .padding(.top, 0)
-        .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.12), radius: 8, x: 0, y: 4)
     }
 
-    private var playingFooter: some View {
-        HStack(spacing: 8) {
-            if vm.initialName == nil {
-                Button {
-                    SoundEffects.shared.play(.buttonPress)
-                    vm.ensureIdentityRegistered(allowFallback: true)
-                } label: {
-                    Text("Join")
-                }
-                .buttonStyle(PixelButtonStyle(filled: true))
-                .controlSize(.small)
-            }
-
-            Button {
-                SoundEffects.shared.play(.buttonPress)
-                SpawnTestPlayer.invoke()
-            } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "figure.2.and.child.holdinghands")
-                    Text("Spawn Rival Bot")
-                }
-            }
-            .buttonStyle(PixelButtonStyle())
-            .controlSize(.small)
-
-            Text("|")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundStyle(Color(white: 0.25))
-
-            HStack(spacing: 10) {
-                HStack(spacing: 5) {
-                    Image(systemName: "person.3.fill")
-                    Text(vm.activeLobbyId.map { "ROOM #\($0)" } ?? "NO ROOM")
-                }
-                HStack(spacing: 5) {
-                    Image(systemName: "dot.radiowaves.left.and.right")
-                    Text("\(vm.players.count) AGENTS")
-                }
-            }
-            .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
-            .foregroundStyle(Color(white: 0.44))
-
-            Spacer(minLength: 12)
-
-            Text("WASD / Arrows  •  ESC: Menu  •  F2P Prototype Build")
-                .font(.custom("AvenirNextCondensed-Medium", size: 11))
-                .foregroundStyle(Color(white: 0.32))
+    @ViewBuilder
+    private func statBadge(value: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 3) {
+            Text(value)
+                #if os(tvOS)
+                .font(.system(size: 36, weight: .black, design: .rounded).monospacedDigit())
+                #else
+                .font(.system(size: 22, weight: .black, design: .rounded).monospacedDigit())
+                #endif
+                .foregroundStyle(color)
+            Image(systemName: icon)
+                #if os(tvOS)
+                .font(.system(size: 16, weight: .bold))
+                #else
+                .font(.system(size: 10, weight: .bold))
+                #endif
+                .foregroundStyle(color.opacity(0.75))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .frame(maxWidth: 920)
-        .background(
-            Rectangle()
-                .fill(Color(red: 0.02, green: 0.08, blue: 0.14).opacity(0.95))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(SurvivorsTheme.accent.opacity(0.48), lineWidth: 2)
-                )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.10), radius: 8, x: 0, y: -2)
     }
-    
-    // MARK: - Overlays Removed
 }
