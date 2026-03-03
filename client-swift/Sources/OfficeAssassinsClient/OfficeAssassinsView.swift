@@ -18,8 +18,8 @@ public enum ExitAction {
 }
 
 public enum SpacetimeEnvironment: String, CaseIterable, Identifiable {
-    case local = "Local Server"
     case prod = "Prod DB"
+    case local = "Local Server"
 
     public var id: String { self.rawValue }
 
@@ -33,8 +33,8 @@ public enum SpacetimeEnvironment: String, CaseIterable, Identifiable {
     }
 }
 
-public struct NinjaGameView: View {
-    @State private var vm: NinjaGameViewModel
+public struct OfficeAssassinsView: View {
+    @State private var vm: OfficeAssassinsViewModel
     @State private var showingResetNameDialog = false
     @State private var resetNameDraft = ""
     private let ownsViewModel: Bool
@@ -49,7 +49,7 @@ public struct NinjaGameView: View {
         isBackground: Bool = false, 
         initialName: String? = nil, 
         isMuted: Bool = false, 
-        injectedVM: NinjaGameViewModel? = nil,
+        injectedVM: OfficeAssassinsViewModel? = nil,
         onMuteToggle: (() -> Void)? = nil, 
         onExit: ((ExitAction) -> Void)? = nil, 
         onMusicChange: ((Bool) -> Void)? = nil
@@ -58,7 +58,7 @@ public struct NinjaGameView: View {
             _vm = State(initialValue: injected)
             self.ownsViewModel = false
         } else {
-            _vm = State(initialValue: NinjaGameViewModel(initialName: initialName))
+            _vm = State(initialValue: OfficeAssassinsViewModel(initialName: initialName))
             self.ownsViewModel = true
         }
         self.isBackground = isBackground
@@ -253,7 +253,7 @@ public struct NinjaGameView: View {
 
                             if let lobby = vm.myLobby {
                                 let count = vm.playerCount(forLobbyId: lobby.id)
-                                let maxCount = NinjaGameViewModel.maxPlayersPerLobby
+                                let maxCount = OfficeAssassinsViewModel.maxPlayersPerLobby
                                 HStack(alignment: .firstTextBaseline) {
                                     Text(lobby.name)
                                         .font(.system(size: 14, weight: .heavy, design: .rounded))
@@ -478,7 +478,7 @@ public struct NinjaGameView: View {
                         .fill(vm.isConnected ? Color.green : Color.red)
                         .frame(width: 7, height: 7)
                     Text(vm.isConnected ? "ONLINE" : "OFFLINE")
-                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .font(.custom("AvenirNextCondensed-Heavy", size: 11))
                         .foregroundStyle(vm.isConnected ? Color.green : Color.red)
                 }
                 .padding(.horizontal, 9)
@@ -491,7 +491,7 @@ public struct NinjaGameView: View {
                         Text("►").foregroundStyle(SurvivorsTheme.accent)
                         Text(me.name)
                     }
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .font(.custom("AvenirNextCondensed-Heavy", size: 12))
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .padding(.horizontal, 9)
@@ -529,7 +529,7 @@ public struct NinjaGameView: View {
 
             if !vm.connectionDetail.isEmpty {
                 Text(vm.connectionDetail)
-                    .font(.system(size: 9, weight: .medium, design: .rounded))
+                    .font(.custom("AvenirNextCondensed-Medium", size: 10))
                     .foregroundStyle(vm.isConnected ? Color(white: 0.42) : Color.red)
                     .lineLimit(1)
                     .padding(.horizontal, 2)
@@ -539,12 +539,13 @@ public struct NinjaGameView: View {
         .padding(.vertical, 10)
         .background(
             Rectangle()
-                .fill(Color(red: 0.07, green: 0.04, blue: 0.16).opacity(0.94))
+                .fill(Color(red: 0.02, green: 0.08, blue: 0.14).opacity(0.95))
                 .overlay(
-                    Rectangle()
-                        .strokeBorder(Color(red: 0.55, green: 0.82, blue: 1.0).opacity(0.38), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(SurvivorsTheme.accent.opacity(0.48), lineWidth: 2)
                 )
         )
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .padding(.top, 0)
         .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.12), radius: 8, x: 0, y: 4)
     }
@@ -568,7 +569,7 @@ public struct NinjaGameView: View {
             } label: {
                 HStack(spacing: 5) {
                     Image(systemName: "figure.2.and.child.holdinghands")
-                    Text("Spawn Bot")
+                    Text("Spawn Rival Bot")
                 }
             }
             .buttonStyle(PixelButtonStyle())
@@ -581,20 +582,20 @@ public struct NinjaGameView: View {
             HStack(spacing: 10) {
                 HStack(spacing: 5) {
                     Image(systemName: "person.3.fill")
-                    Text(vm.activeLobbyId.map { "LOBBY #\($0)" } ?? "NO LOBBY")
+                    Text(vm.activeLobbyId.map { "ROOM #\($0)" } ?? "NO ROOM")
                 }
                 HStack(spacing: 5) {
                     Image(systemName: "dot.radiowaves.left.and.right")
-                    Text("\(vm.players.count) ONLINE")
+                    Text("\(vm.players.count) AGENTS")
                 }
             }
-            .font(.system(size: 10, weight: .bold, design: .rounded))
+            .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
             .foregroundStyle(Color(white: 0.44))
 
             Spacer(minLength: 12)
 
-            Text("WASD / Arrows  •  Esc: Menu")
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+            Text("WASD / Arrows  •  ESC: Menu  •  F2P Prototype Build")
+                .font(.custom("AvenirNextCondensed-Medium", size: 11))
                 .foregroundStyle(Color(white: 0.32))
         }
         .padding(.horizontal, 14)
@@ -602,12 +603,13 @@ public struct NinjaGameView: View {
         .frame(maxWidth: 920)
         .background(
             Rectangle()
-                .fill(Color(red: 0.07, green: 0.04, blue: 0.16).opacity(0.94))
+                .fill(Color(red: 0.02, green: 0.08, blue: 0.14).opacity(0.95))
                 .overlay(
-                    Rectangle()
-                        .strokeBorder(Color(red: 0.55, green: 0.82, blue: 1.0).opacity(0.38), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(SurvivorsTheme.accent.opacity(0.48), lineWidth: 2)
                 )
         )
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: Color(red: 0.3, green: 0.6, blue: 1.0).opacity(0.10), radius: 8, x: 0, y: -2)
     }
     

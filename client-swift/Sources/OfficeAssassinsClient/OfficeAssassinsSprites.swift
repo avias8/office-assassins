@@ -11,9 +11,10 @@ private let baseEntitySpriteSize: CGFloat = 58
 fileprivate struct VisiblePlayerSnapshot: Identifiable {
     let id: UInt64
     let player: Player
+    let model: OfficeAssassinsViewModel.PlayerModel
     let worldX: Float
     let worldY: Float
-    let direction: NinjaGameViewModel.NinjaDirection
+    let direction: OfficeAssassinsViewModel.FacingDirection
     let isMoving: Bool
     let isFlashing: Bool
     let color: Color
@@ -74,10 +75,12 @@ func swordPositions(count: Int, t: TimeInterval) -> [CGPoint] {
 }
 
 struct SwiftUIGameViewport: View {
-    let vm: NinjaGameViewModel
+    let vm: OfficeAssassinsViewModel
     @State private var lastFrameTimestamp: TimeInterval?
     @State private var frameMs: Double = 0
-    private static let showPerfHUD = ProcessInfo.processInfo.environment["NINJA_PERF_HUD"] == "1"
+    private static let showPerfHUD =
+        ProcessInfo.processInfo.environment["OFFICE_PERF_HUD"] == "1" ||
+        ProcessInfo.processInfo.environment["NINJA_PERF_HUD"] == "1"
     private static let renderInterval: TimeInterval = 1.0 / 120.0
 
     var body: some View {
@@ -125,6 +128,7 @@ struct SwiftUIGameViewport: View {
                     return VisiblePlayerSnapshot(
                         id: player.id,
                         player: player,
+                        model: vm.playerModel(for: player),
                         worldX: worldX,
                         worldY: worldY,
                         direction: vm.playerDirections[player.id] ?? .south,
@@ -409,7 +413,7 @@ private struct GameEntitiesCanvas: View {
                     x: (CGFloat(snapshot.worldX) - camX) * zoom,
                     y: (CGFloat(snapshot.worldY) - camY) * zoom
                 )
-                drawNinja(
+                drawCharacter(
                     in: &ctx,
                     center: center,
                     direction: snapshot.direction,
@@ -417,6 +421,7 @@ private struct GameEntitiesCanvas: View {
                     hitFlash: snapshot.isFlashing,
                     t: t,
                     scale: zoom,
+                    model: snapshot.model,
                     baseColor: snapshot.color,
                     lowHealth: snapshot.player.health < 33
                 )
@@ -439,10 +444,146 @@ private struct GameEntitiesCanvas: View {
         }
     }
 
+    private func drawCharacter(
+        in ctx: inout GraphicsContext,
+        center: CGPoint,
+        direction: OfficeAssassinsViewModel.FacingDirection,
+        isMoving: Bool,
+        hitFlash: Bool,
+        t: TimeInterval,
+        scale: CGFloat,
+        model: OfficeAssassinsViewModel.PlayerModel,
+        baseColor: Color,
+        lowHealth: Bool
+    ) {
+        switch model {
+        case .operatorLite:
+            drawOperatorLite(
+                in: &ctx,
+                center: center,
+                direction: direction,
+                isMoving: isMoving,
+                hitFlash: hitFlash,
+                t: t,
+                scale: scale,
+                baseColor: baseColor,
+                lowHealth: lowHealth
+            )
+        case .drone:
+            drawDrone(
+                in: &ctx,
+                center: center,
+                isMoving: isMoving,
+                hitFlash: hitFlash,
+                t: t,
+                scale: scale,
+                baseColor: baseColor,
+                lowHealth: lowHealth
+            )
+        case .ninja:
+            drawNinja(
+                in: &ctx,
+                center: center,
+                direction: direction,
+                isMoving: isMoving,
+                hitFlash: hitFlash,
+                t: t,
+                scale: scale,
+                baseColor: baseColor,
+                lowHealth: lowHealth
+            )
+        }
+    }
+
+    private func drawOperatorLite(
+        in ctx: inout GraphicsContext,
+        center: CGPoint,
+        direction: OfficeAssassinsViewModel.FacingDirection,
+        isMoving: Bool,
+        hitFlash: Bool,
+        t: TimeInterval,
+        scale: CGFloat,
+        baseColor: Color,
+        lowHealth: Bool
+    ) {
+        let sprite = baseEntitySpriteSize * scale
+        let w = sprite
+        let h = sprite
+        let x = center.x - w * 0.5
+        let y = center.y - h * 0.5
+        let bob = isMoving ? CGFloat(sin(t * 10.0)) * 1.2 * scale : CGFloat(sin(t * 2.0)) * 0.6 * scale
+        let bodyY = y + bob
+
+        let primary = hitFlash ? Color.white : baseColor.opacity(lowHealth ? 0.85 : 1.0)
+        let dark = hitFlash ? Color.white : Color(red: 0.06, green: 0.09, blue: 0.13)
+        let visor = hitFlash ? Color.white : Color(red: 0.72, green: 0.93, blue: 1.0)
+
+        let shadow = CGRect(x: x + w * 0.26, y: bodyY + h * 0.78, width: w * 0.48, height: h * 0.11)
+        ctx.fill(Path(ellipseIn: shadow), with: .color(Color.black.opacity(0.32)))
+
+        let torso = CGRect(x: x + w * 0.30, y: bodyY + h * 0.26, width: w * 0.40, height: h * 0.38)
+        ctx.fill(Path(roundedRect: torso, cornerSize: CGSize(width: 6 * scale, height: 6 * scale)), with: .color(primary))
+
+        let head = CGRect(x: x + w * 0.33, y: bodyY + h * 0.10, width: w * 0.34, height: h * 0.18)
+        ctx.fill(Path(roundedRect: head, cornerSize: CGSize(width: 5 * scale, height: 5 * scale)), with: .color(dark))
+
+        let visorRect: CGRect
+        switch direction {
+        case .east:
+            visorRect = CGRect(x: head.minX + head.width * 0.42, y: head.minY + head.height * 0.32, width: head.width * 0.48, height: head.height * 0.32)
+        case .west:
+            visorRect = CGRect(x: head.minX + head.width * 0.10, y: head.minY + head.height * 0.32, width: head.width * 0.48, height: head.height * 0.32)
+        default:
+            visorRect = CGRect(x: head.minX + head.width * 0.18, y: head.minY + head.height * 0.32, width: head.width * 0.64, height: head.height * 0.28)
+        }
+        ctx.fill(Path(roundedRect: visorRect, cornerSize: CGSize(width: 3 * scale, height: 3 * scale)), with: .color(visor))
+
+        let legSwing = isMoving ? CGFloat(sin(t * 10.0 + .pi / 2)) * 2.0 * scale : 0
+        let leftLeg = CGRect(x: x + w * 0.36 - legSwing, y: bodyY + h * 0.64, width: w * 0.11, height: h * 0.16)
+        let rightLeg = CGRect(x: x + w * 0.53 + legSwing, y: bodyY + h * 0.64, width: w * 0.11, height: h * 0.16)
+        ctx.fill(Path(roundedRect: leftLeg, cornerSize: CGSize(width: 3 * scale, height: 3 * scale)), with: .color(dark))
+        ctx.fill(Path(roundedRect: rightLeg, cornerSize: CGSize(width: 3 * scale, height: 3 * scale)), with: .color(dark))
+    }
+
+    private func drawDrone(
+        in ctx: inout GraphicsContext,
+        center: CGPoint,
+        isMoving: Bool,
+        hitFlash: Bool,
+        t: TimeInterval,
+        scale: CGFloat,
+        baseColor: Color,
+        lowHealth: Bool
+    ) {
+        let sprite = baseEntitySpriteSize * scale
+        let r = sprite * 0.26
+        let floatY = center.y + CGFloat(sin(t * (isMoving ? 7.5 : 3.0))) * 2.0 * scale
+        let primary = hitFlash ? Color.white : baseColor.opacity(lowHealth ? 0.85 : 1.0)
+        let core = hitFlash ? Color.white : Color(red: 0.88, green: 0.96, blue: 1.0)
+
+        let shadow = CGRect(x: center.x - r * 1.1, y: floatY + r * 1.3, width: r * 2.2, height: r * 0.7)
+        ctx.fill(Path(ellipseIn: shadow), with: .color(Color.black.opacity(0.28)))
+
+        let body = CGRect(x: center.x - r, y: floatY - r, width: r * 2, height: r * 2)
+        ctx.fill(Path(ellipseIn: body), with: .color(primary))
+
+        let coreRect = CGRect(x: center.x - r * 0.42, y: floatY - r * 0.42, width: r * 0.84, height: r * 0.84)
+        ctx.fill(Path(ellipseIn: coreRect), with: .color(core))
+
+        let armLen = r * 1.05
+        for i in 0..<4 {
+            let a = CGFloat(Double(i) * (.pi / 2.0) + t * 0.6)
+            let px = center.x + cos(a) * armLen
+            let py = floatY + sin(a) * armLen
+            let prop = CGRect(x: px - r * 0.22, y: py - r * 0.22, width: r * 0.44, height: r * 0.44)
+            ctx.fill(Path(ellipseIn: prop), with: .color(primary.opacity(0.88)))
+        }
+    }
+
     private func drawNinja(
         in ctx: inout GraphicsContext,
         center: CGPoint,
-        direction: NinjaGameViewModel.NinjaDirection,
+        direction: OfficeAssassinsViewModel.FacingDirection,
         isMoving: Bool,
         hitFlash: Bool,
         t: TimeInterval,
@@ -577,7 +718,7 @@ private struct GameEntitiesCanvas: View {
 
 struct PlayerEntityView: View {
     let player: Player
-    let vm: NinjaGameViewModel
+    let vm: OfficeAssassinsViewModel
     let t: TimeInterval
     let camX: CGFloat
     let camY: CGFloat
@@ -599,13 +740,14 @@ struct PlayerEntityView: View {
         let px = (CGFloat(worldX) - camX) * zoom
         let py = (CGFloat(worldY) - camY) * zoom
 
-        // Render a fully procedural ninja (no texture assets).
+        // Render a fully procedural assassin (no texture assets).
         let direction = vm.playerDirections[player.id] ?? .south
         let isMoving = vm.playerIsMoving[player.id] ?? false
         let isFlashing = t - hitFlashTime < 0.15
         let baseColor = Color.fromId(player.id)
+        let model = vm.playerModel(for: player)
 
-        playerSprite(direction: direction, isMoving: isMoving, t: t, isFlashing: isFlashing, color: baseColor)
+        playerSprite(model: model, direction: direction, isMoving: isMoving, t: t, isFlashing: isFlashing, color: baseColor)
         .shadow(color: Color.black.opacity(0.35), radius: 3, x: 0, y: 2)
         .colorMultiply(player.health < 33 ? Color.red.opacity(0.8) : Color.white)
         .onChange(of: player.health) { oldHealth, newHealth in
@@ -631,20 +773,47 @@ struct PlayerEntityView: View {
         .position(x: px, y: py)
     }
 
-    private func playerSprite(direction: NinjaGameViewModel.NinjaDirection, isMoving: Bool, t: TimeInterval, isFlashing: Bool, color: Color) -> some View {
-        ProceduralNinjaSpriteView(
-            direction: direction,
-            isMoving: isMoving,
-            t: t,
-            spriteSize: CGSize(width: 58 * zoom, height: 58 * zoom),
-            hitFlash: isFlashing,
-            baseColor: color
-        )
+    @ViewBuilder
+    private func playerSprite(
+        model: OfficeAssassinsViewModel.PlayerModel,
+        direction: OfficeAssassinsViewModel.FacingDirection,
+        isMoving: Bool,
+        t: TimeInterval,
+        isFlashing: Bool,
+        color: Color
+    ) -> some View {
+        switch model {
+        case .ninja:
+            ProceduralAssassinSpriteView(
+                direction: direction,
+                isMoving: isMoving,
+                t: t,
+                spriteSize: CGSize(width: 58 * zoom, height: 58 * zoom),
+                hitFlash: isFlashing,
+                baseColor: color
+            )
+        case .operatorLite:
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(isFlashing ? Color.white : color)
+                .frame(width: 30 * zoom, height: 36 * zoom)
+        case .drone:
+            Circle()
+                .fill(isFlashing ? Color.white : color)
+                .frame(width: 30 * zoom, height: 30 * zoom)
+        }
     }
 }
 
 struct PlayerLabelsView: View {
     let player: Player
+
+    private var modelTag: String {
+        switch player.playerModel {
+        case 2: return "NINJA"
+        case 1: return "DRONE"
+        default: return "OP"
+        }
+    }
 
     var body: some View {
         VStack(spacing: 2) {
@@ -653,10 +822,19 @@ struct PlayerLabelsView: View {
                     .font(.system(size: 9, weight: .heavy, design: .rounded))
                     .foregroundStyle(SurvivorsTheme.accent)
             }
-            Text(player.name.uppercased())
-                .font(.system(size: 9, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1)
+            HStack(spacing: 4) {
+                Text(player.name.uppercased())
+                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(modelTag)
+                    .font(.system(size: 7, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(red: 0.82, green: 0.94, blue: 1.0))
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 1)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Capsule(style: .continuous))
+            }
 
             HealthBar(health: player.health)
         }
@@ -714,8 +892,8 @@ struct WeaponEntityView: View {
 
 // MARK: - Native Sprite Rendering
 
-struct ProceduralNinjaSpriteView: View {
-    let direction: NinjaGameViewModel.NinjaDirection
+struct ProceduralAssassinSpriteView: View {
+    let direction: OfficeAssassinsViewModel.FacingDirection
     let isMoving: Bool
     let t: TimeInterval
     let spriteSize: CGSize
@@ -864,7 +1042,7 @@ struct ProceduralNinjaSpriteView: View {
             .frame(width: spriteSize.width, height: spriteSize.height)
         }
         .frame(width: spriteSize.width, height: spriteSize.height)
-        .accessibilityLabel("Procedural ninja sprite")
+        .accessibilityLabel("Procedural assassin sprite")
     }
 }
 

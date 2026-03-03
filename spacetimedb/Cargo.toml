@@ -1,5 +1,5 @@
 [package]
-name = "ninja-game"
+name = "office-assassins"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-spacetimedb = { path = "../../../crates/bindings", version = "2.0.3" }
+spacetimedb = "2.0.2"
 log = "0.4"
 
 [workspace]

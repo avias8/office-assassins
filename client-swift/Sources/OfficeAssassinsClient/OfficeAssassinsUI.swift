@@ -26,16 +26,17 @@ struct HudStatChip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(label)
-                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .font(.custom("AvenirNextCondensed-DemiBold", size: 10))
                 .foregroundStyle(tint.opacity(0.72))
             Text(value)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.custom("AvenirNextCondensed-Heavy", size: 14))
                 .foregroundStyle(tint)
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 5)
-        .background(tint.opacity(0.10))
-        .overlay(Rectangle().strokeBorder(tint.opacity(0.42), lineWidth: 2))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(tint.opacity(0.14))
+        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(tint.opacity(0.42), lineWidth: 1.5))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
@@ -58,10 +59,10 @@ struct HudHealthMeter: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 Text("HP")
-                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    .font(.custom("AvenirNextCondensed-Heavy", size: 10))
                     .foregroundStyle(healthColor.opacity(0.80))
                 Text("\(Int(clampedHealth))/100")
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .font(.custom("AvenirNextCondensed-Heavy", size: 12))
                     .foregroundStyle(healthColor)
             }
 
@@ -80,7 +81,8 @@ struct HudHealthMeter: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
         .background(Color.white.opacity(0.06))
-        .overlay(Rectangle().strokeBorder(Color(white: 0.28), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Color(white: 0.28), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
@@ -138,14 +140,14 @@ struct EventFeedView: View {
             let visible = renderedEvents(at: timeline.date)
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.system(size: 10, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(white: 0.72))
+                    .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
+                    .foregroundStyle(SurvivorsTheme.textMuted)
                     .shadow(color: .black, radius: 2, x: 1, y: 1)
 
                 ZStack(alignment: .topLeading) {
                     if visible.isEmpty {
                         Text("No recent events")
-                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                            .font(.custom("AvenirNextCondensed-Medium", size: 11))
                             .foregroundStyle(Color(white: 0.35))
                             .shadow(color: .black.opacity(0.8), radius: 1, x: 1, y: 1)
                     }
@@ -154,11 +156,11 @@ struct EventFeedView: View {
                         ForEach(visible) { item in
                             HStack(spacing: 6) {
                                 Text(item.entry.kind == .combat ? "►" : "·")
-                                    .font(.system(size: 9, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(item.entry.kind == .combat ? Color.orange : SurvivorsTheme.accent)
+                                    .font(.custom("AvenirNextCondensed-Heavy", size: 10))
+                                    .foregroundStyle(item.entry.kind == .combat ? SurvivorsTheme.accentSecondary : SurvivorsTheme.accent)
                                     .shadow(color: .black.opacity(0.8), radius: 1, x: 0, y: 1)
                                 Text(item.entry.text)
-                                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                                    .font(.custom("AvenirNextCondensed-Medium", size: 11))
                                     .foregroundStyle(.white)
                                     .lineLimit(1)
                                     .shadow(color: .black, radius: 1.5, x: 1, y: 1)

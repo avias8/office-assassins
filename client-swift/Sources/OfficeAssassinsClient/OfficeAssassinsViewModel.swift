@@ -10,14 +10,38 @@ import Darwin
 
 @MainActor
 @Observable
-public class NinjaGameViewModel: SpacetimeClientDelegate {
+public class OfficeAssassinsViewModel: SpacetimeClientDelegate {
     static let maxPlayersPerLobby = 30
 
-    public enum NinjaDirection {
+    public enum PlayerModel: UInt8, CaseIterable, Identifiable {
+        case operatorLite = 0
+        case drone = 1
+        case ninja = 2
+
+        public var id: UInt8 { rawValue }
+
+        var label: String {
+            switch self {
+            case .operatorLite: return "Operator"
+            case .drone: return "Drone"
+            case .ninja: return "Ninja"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .operatorLite: return "person.fill"
+            case .drone: return "circle.hexagongrid.fill"
+            case .ninja: return "eye.fill"
+            }
+        }
+    }
+
+    public enum FacingDirection {
         case north, south, east, west
     }
 
-    public var environment: SpacetimeEnvironment = .local
+    public var environment: SpacetimeEnvironment = .prod
     var players: [Player] = []
     private var allPlayers: [Player] = []
     private var playersById: [UInt64: Player] = [:]
@@ -33,6 +57,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
     private var client: SpacetimeClient?
     var recentEvents: [GameEventEntry] = []
     var renderPlayers: [Player] = []
+    var selectedPlayerModel: PlayerModel = .operatorLite
     
     
     /// Tracks previous player states to detect drops in health or increases in kills.
@@ -40,7 +65,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
     private var hitFlashUntilByPlayerId: [UInt64: TimeInterval] = [:]
     
     /// Tracks which way each player is currently facing for animation.
-    var playerDirections: [UInt64: NinjaDirection] = [:]
+    var playerDirections: [UInt64: FacingDirection] = [:]
     /// Tracks if a remote player was moving in the last tick to trigger walk anims.
     var playerIsMoving: [UInt64: Bool] = [:]
     
@@ -140,7 +165,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
     }
     private actor SwordCollisionWorker {
         func compute(snapshot: SwordCollisionSnapshot, maxHits: Int) -> [UInt64] {
-            NinjaGameViewModel.computeSwordCollisionHits(snapshot: snapshot, maxHits: maxHits)
+            OfficeAssassinsViewModel.computeSwordCollisionHits(snapshot: snapshot, maxHits: maxHits)
         }
     }
     private let collisionWorker = SwordCollisionWorker()
@@ -188,6 +213,9 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
     private var renderSortScratch: [(y: Float, player: Player)] = []
     private var seenPlayerIdsScratch: Set<UInt64> = []
     private var stalePlayerIdsScratch: [UInt64] = []
+    private var lastModelSendAttemptAt: TimeInterval = 0
+    private var hasHydratedSelectedModel = false
+    private let preferredModelDefaultsKey = "officeassassins.preferred_player_model"
 
     private static var collisionTaskPriority: TaskPriority {
         if let override = ProcessInfo.processInfo.environment["NINJA_COLLISION_PRIORITY"]?.lowercased() {
@@ -300,7 +328,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
                 )
             }
             let summary = rows.joined(separator: " | ")
-            print("[NinjaGame][Profile][\(reason)][samples=\(sampleCount)] \(summary)")
+            print("[OfficeAssassins][Profile][\(reason)][samples=\(sampleCount)] \(summary)")
             sectionTotalsNs = Array(repeating: 0, count: sectionTotalsNs.count)
             sectionCounts = Array(repeating: 0, count: sectionCounts.count)
             sectionMaxNs = Array(repeating: 0, count: sectionMaxNs.count)
@@ -315,6 +343,10 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
 
     init(initialName: String? = nil) {
         self.initialName = initialName
+        if let raw = UserDefaults.standard.object(forKey: preferredModelDefaultsKey) as? UInt8,
+           let model = PlayerModel(rawValue: raw) {
+            self.selectedPlayerModel = model
+        }
         SpacetimeModule.registerTables()
     }
 
@@ -326,7 +358,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
 
         let newClient = SpacetimeClient(
             serverUrl: environment.url,
-            moduleName: "ninjagame"
+            moduleName: "officeassassins"
         )
         newClient.delegate = self
         self.client = newClient
@@ -428,6 +460,8 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         renderPlayers = []
         lastRenderOrderUpdateTime = 0
         renderPlayersDirty = false
+        lastModelSendAttemptAt = 0
+        hasHydratedSelectedModel = false
     }
 
     // MARK: - SpacetimeClientDelegate
@@ -439,6 +473,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         // Set player name after identifying with the server.
         // If initialName is nil (Reconnect flow), don't force rename.
         ensureIdentityRegistered(allowFallback: false)
+        syncSelectedPlayerModelIfNeeded(now: Date.timeIntervalSinceReferenceDate, force: true)
         performPendingQuickJoinIfNeeded()
     }
 
@@ -456,10 +491,10 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         eventSnapshotPlayersById.removeAll()
         if let error {
             connectionDetail = error.localizedDescription
-            print("[NinjaGame] onDisconnect(error): \(error.localizedDescription)")
+            print("[OfficeAssassins] onDisconnect(error): \(error.localizedDescription)")
         } else {
             connectionDetail = ""
-            print("[NinjaGame] onDisconnect(clean)")
+            print("[OfficeAssassins] onDisconnect(clean)")
         }
         clearGameState()
     }
@@ -467,7 +502,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
     public func onIdentityReceived(identity: [UInt8], token: String) {
         guard identity.count >= 8 else { return }
         self.userId = identity.withUnsafeBytes { $0.loadUnaligned(as: UInt64.self).littleEndian }
-        print("[NinjaGame] userId set to: \(String(format: "%016llx", self.userId!))")
+        print("[OfficeAssassins] userId set to: \(String(format: "%016llx", self.userId!))")
     }
 
     public func onTransactionUpdate(message: Data?) {
@@ -496,10 +531,15 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
 
             if verboseNetworkLogging {
                 let idList = pTable.map { String(format: "%016llx", $0.id) }.joined(separator: ", ")
-                print("[NinjaGame] onTransactionUpdate: userId=\(userId.map { String(format:"%016llx",$0) } ?? "nil") players=[\(idList)] hasJoined=\(hasJoined)")
+                print("[OfficeAssassins] onTransactionUpdate: userId=\(userId.map { String(format:"%016llx",$0) } ?? "nil") players=[\(idList)] hasJoined=\(hasJoined)")
             }
 
             if let myId = userId, let me = playersById[myId] {
+                if !hasHydratedSelectedModel, let serverModel = PlayerModel(rawValue: me.playerModel) {
+                    selectedPlayerModel = serverModel
+                    hasHydratedSelectedModel = true
+                }
+                syncSelectedPlayerModelIfNeeded(now: now)
                 let serverX = clampToWorld(me.x, padding: playerClampPadding)
                 let serverY = clampToWorld(me.y, padding: playerClampPadding)
                 if me.lobbyId != nil {
@@ -667,11 +707,11 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
     public func onReducerError(reducer: String, message: String, isInternal: Bool) {
         let lowered = message.lowercased()
         if lowered.contains("no such reducer") {
-            connectionDetail = "missing reducer '\(reducer)' on server; publish ninjagame module"
+            connectionDetail = "missing reducer '\(reducer)' on server; publish officeassassins module"
         } else {
             connectionDetail = "\(isInternal ? "internal" : "reducer") error (\(reducer))"
         }
-        print("[NinjaGame] reducer error for '\(reducer)': \(message)")
+        print("[OfficeAssassins] reducer error for '\(reducer)': \(message)")
     }
 
     func ensureIdentityRegistered(allowFallback: Bool) {
@@ -705,6 +745,47 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         initialName = trimmed
         connectionDetail = "Updating name to \(trimmed)…"
         SetName.invoke(name: trimmed)
+    }
+
+    func selectPlayerModel(_ model: PlayerModel) {
+        selectedPlayerModel = model
+        hasHydratedSelectedModel = true
+        UserDefaults.standard.set(model.rawValue, forKey: preferredModelDefaultsKey)
+        syncSelectedPlayerModelIfNeeded(now: Date.timeIntervalSinceReferenceDate, force: true)
+    }
+
+    func playerModel(for player: Player) -> PlayerModel {
+        PlayerModel(rawValue: player.playerModel) ?? .operatorLite
+    }
+
+    private struct SetPlayerModelArgs: Codable, Sendable, BSATNSpecialEncodable {
+        let playerModel: UInt8
+
+        func encodeBSATN(to storage: inout BSATNStorage) throws {
+            storage.appendU8(playerModel)
+        }
+    }
+
+    private func sendSetPlayerModel(_ rawModel: UInt8) {
+        do {
+            let argBytes = try BSATNEncoder().encode(SetPlayerModelArgs(playerModel: rawModel))
+            SpacetimeClient.shared?.send("set_player_model", argBytes)
+        } catch {
+            connectionDetail = "Failed to set model"
+            print("[OfficeAssassins] set_player_model encode failed: \(error)")
+        }
+    }
+
+    private func syncSelectedPlayerModelIfNeeded(now: TimeInterval, force: Bool = false) {
+        guard isStarted, isConnected else { return }
+        guard let me = myPlayer else { return }
+
+        let current = PlayerModel(rawValue: me.playerModel) ?? .operatorLite
+        guard force || current != selectedPlayerModel else { return }
+        guard force || now - lastModelSendAttemptAt >= 0.35 else { return }
+
+        lastModelSendAttemptAt = now
+        sendSetPlayerModel(selectedPlayerModel.rawValue)
     }
 
     func scheduleQuickJoinFromTitle() {
@@ -811,7 +892,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
             return
         }
         lastReconnectAttemptAt = now
-        print("[NinjaGame] reconnect requested: \(detail)")
+        print("[OfficeAssassins] reconnect requested: \(detail)")
         client?.connect()
     }
 
@@ -885,7 +966,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         }
         clearPendingLobbyAction()
         connectionDetail = "Joining lobby…"
-        print("[NinjaGame] joinLobbyWithRetry invoke lobbyId=\(lobbyId), attempts=\(attempts)")
+        print("[OfficeAssassins] joinLobbyWithRetry invoke lobbyId=\(lobbyId), attempts=\(attempts)")
         JoinLobby.invoke(lobbyId: lobbyId)
 
         guard attempts > 0 else { return }
@@ -944,7 +1025,7 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
             }
             return
         }
-        print("[NinjaGame] quickJoin target lobbyId=\(targetLobby.id) isPlaying=\(targetLobby.isPlaying)")
+        print("[OfficeAssassins] quickJoin target lobbyId=\(targetLobby.id) isPlaying=\(targetLobby.isPlaying)")
         joinLobbyWithRetry(lobbyId: targetLobby.id, attemptsRemaining: lobbyActionMaxRetries)
     }
 
@@ -1253,9 +1334,9 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         }
 
         // Pixel-perfect AABB (Axis-Aligned Bounding Box) dimensions (width / 2, height / 2)
-        // Ninja is 36x42, Sword is 15x39
-        let ninjaHalfW: Float = 18.0
-        let ninjaHalfH: Float = 21.0
+        // Assassin sprite is 36x42, Sword is 15x39
+        let assassinHalfW: Float = 18.0
+        let assassinHalfH: Float = 21.0
         let swordHalfW: Float = 7.5
         let swordHalfH: Float = 19.5
         let myPosition = SIMD2<Float>(snapshot.myX, snapshot.myY)
@@ -1290,14 +1371,14 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
         }
 
         let maxSwordRadius = sqrt(maxSwordRadiusSq)
-        let targetCullRadius = maxSwordRadius + ninjaHalfW + swordHalfH
+        let targetCullRadius = maxSwordRadius + assassinHalfW + swordHalfH
         let targetCullRadiusSq = targetCullRadius * targetCullRadius
 
         // Coarse union bounds for all swords, expanded by target body size.
-        let expandedLeft = swordsMinLeft - ninjaHalfW
-        let expandedRight = swordsMaxRight + ninjaHalfW
-        let expandedTop = swordsMinTop - ninjaHalfH
-        let expandedBottom = swordsMaxBottom + ninjaHalfH
+        let expandedLeft = swordsMinLeft - assassinHalfW
+        let expandedRight = swordsMaxRight + assassinHalfW
+        let expandedTop = swordsMinTop - assassinHalfH
+        let expandedBottom = swordsMaxBottom + assassinHalfH
 
         var hitTargets: [UInt64] = []
         hitTargets.reserveCapacity(min(snapshot.targets.count, maxHits))
@@ -1310,10 +1391,10 @@ public class NinjaGameViewModel: SpacetimeClientDelegate {
             guard centerDistSq <= targetCullRadiusSq else { continue }
 
             // Target bounds
-            let tLeft = target.x - ninjaHalfW
-            let tRight = target.x + ninjaHalfW
-            let tTop = target.y - ninjaHalfH
-            let tBottom = target.y + ninjaHalfH
+            let tLeft = target.x - assassinHalfW
+            let tRight = target.x + assassinHalfW
+            let tTop = target.y - assassinHalfH
+            let tBottom = target.y + assassinHalfH
 
             guard tRight >= expandedLeft, tLeft <= expandedRight, tBottom >= expandedTop, tTop <= expandedBottom else {
                 continue

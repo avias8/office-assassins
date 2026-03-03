@@ -9,12 +9,15 @@ const PICKUP_RADIUS: f32 = 50.0;
 const DAMAGE_PER_HIT: u32 = 5;
 const HIT_COOLDOWN_MICROS: i64 = 125_000;
 const MAX_PLAYERS_PER_LOBBY: usize = 30;
+const DEFAULT_PLAYER_MODEL: u8 = 0;
+const MAX_PLAYER_MODEL: u8 = 2;
 
 #[spacetimedb::table(accessor = player, public)]
 pub struct Player {
     #[primary_key]
     pub id: u64,
     pub name: String,
+    pub player_model: u8,
     pub x: f32,
     pub y: f32,
     pub health: u32,
@@ -23,6 +26,10 @@ pub struct Player {
     pub respawn_at_micros: i64,
     pub is_ready: bool,
     pub lobby_id: Option<u64>,
+}
+
+fn normalize_player_model(raw: u8) -> u8 {
+    raw.min(MAX_PLAYER_MODEL)
 }
 
 #[spacetimedb::table(accessor = lobby, public)]
@@ -198,6 +205,7 @@ fn upsert_player_name(ctx: &ReducerContext, player_id: u64, name: String) {
     ctx.db.player().insert(Player {
         id: player_id,
         name,
+        player_model: DEFAULT_PLAYER_MODEL,
         x: 500.0,
         y: 500.0,
         health: START_HEALTH,
@@ -207,6 +215,16 @@ fn upsert_player_name(ctx: &ReducerContext, player_id: u64, name: String) {
         is_ready: false,
         lobby_id: None,
     });
+}
+
+#[spacetimedb::reducer]
+pub fn set_player_model(ctx: &ReducerContext, player_model: u8) {
+    let player_id = player_id_from_ctx(ctx);
+    let Some(mut player) = ctx.db.player().id().find(player_id) else {
+        return;
+    };
+    player.player_model = normalize_player_model(player_model);
+    ctx.db.player().id().update(player);
 }
 
 fn apply_combat(ctx: &ReducerContext, attacker_id: u64, target_id: u64) {
@@ -602,6 +620,7 @@ pub fn spawn_test_player(ctx: &ReducerContext) {
     ctx.db.player().insert(Player {
         id: bot_id,
         name: bot_name,
+        player_model: 1,
         x,
         y,
         health: START_HEALTH,

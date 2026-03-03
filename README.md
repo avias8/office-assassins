@@ -1,45 +1,85 @@
-# Ninja Game (Swift + SpacetimeDB)
+# Office Assassins (iOS Game Starter)
 
-Realtime 2D multiplayer demo used to validate the Swift SDK at game-like update rates.
+Realtime 2D multiplayer game starter built with:
+- SwiftUI client (`client-swift`)
+- SpacetimeDB module in Rust (`spacetimedb`)
 
-## Local Setup
+This repo is a standalone template for building an iOS-first realtime multiplayer game.
+
+## Prerequisites
+
+- Xcode 16+ (iOS 17 SDK)
+- Swift 6.2+
+- Rust + Cargo
+- SpacetimeDB CLI (`spacetime`)
+
+## Quick Start
 
 From repo root:
 
 ```bash
-spacetime start
-spacetime publish -s local -p demo/ninja-game/spacetimedb ninjagame -c -y
+./scripts/bootstrap.sh
+./scripts/publish-prod.sh
 ```
 
-Run the client:
+Or with `make`:
 
 ```bash
-cd demo/ninja-game/client-swift
+make bootstrap
+make run
+```
+
+Then open the client in Xcode:
+
+```bash
+cd client-swift
 open Package.swift
 ```
 
-In Xcode, run `NinjaGameClient`.
+Run `OfficeAssassinsClient` on an iOS simulator/device.
 
-## Multi-Client Soak Check (Milestone 6)
+## Daily Dev Workflow
 
-1. Launch two client instances (or run once in Xcode and once with `swift run`).
-2. Join both clients with different names.
-3. Move on both clients for 2-3 minutes.
-4. Trigger combat, pickups, respawn, and clear-server flow.
+1. Publish latest module to production DB:
 
-Expected signals:
+```bash
+./scripts/publish-prod.sh
+```
 
-- Status bar remains `Connected`.
-- Player count and positions replicate across both clients in near real time.
-- Weapon drops and pickups replicate consistently.
-- Combat health/kills updates match across clients.
-- No repeated reducer failures in logs.
+2. Run the app from Xcode (`OfficeAssassinsClient`).
+3. Confirm environment is `Prod DB` in the title screen (now default).
+4. Iterate on game logic:
+- Client/UI code: `client-swift/Sources/OfficeAssassinsClient`
+- Authoritative multiplayer logic: `spacetimedb/src/lib.rs`
 
-## Troubleshooting
+## Project Layout
 
-- `missing reducer ... publish ninjagame module` in status bar:
-  module on server is stale; re-run publish command and reconnect.
-- `Disconnected` or websocket errors:
-  confirm local server is running on `http://127.0.0.1:3000`.
-- No replicated updates:
-  verify `ninjagame` database name and that the module publish succeeded.
+- `client-swift/`: SwiftUI game client and generated SpacetimeDB bindings.
+- `spacetimedb/`: Rust tables/reducers for multiplayer state and gameplay rules.
+- `scripts/bootstrap.sh`: one-time validation/build setup.
+- `scripts/publish-prod.sh`: publish module to `maincloud` production DB.
+- `scripts/run-local.sh`: optional local-only server + publish workflow for development testing.
+
+## Verification Commands
+
+```bash
+# Client
+cd client-swift && swift build
+
+# Server module
+cd spacetimedb && cargo check
+```
+
+Or:
+
+```bash
+make build-client
+make check-server
+```
+
+## Notes
+
+- Production publish target is `maincloud` with DB name `officeassassins` (override in `./scripts/publish-prod.sh <db_name>`).
+- App default connection environment is `Prod DB`.
+- Local server endpoint remains available at `http://127.0.0.1:3000` for optional local testing.
+- If you plan to re-theme/rename the game, start by updating app-facing names and assets in `client-swift/Sources/OfficeAssassinsClient/Resources`.

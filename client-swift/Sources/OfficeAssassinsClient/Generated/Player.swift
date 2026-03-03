@@ -8,6 +8,7 @@ import simd
 public struct Player: Codable, Sendable, BSATNSpecialDecodable, BSATNSpecialEncodable {
   public var id: UInt64
   public var name: String
+  public var playerModel: UInt8
   public var x: Float
   public var y: Float
   public var health: UInt32
@@ -21,6 +22,7 @@ public struct Player: Codable, Sendable, BSATNSpecialDecodable, BSATNSpecialEnco
     return Player(
       id: try reader.readU64(),
       name: try reader.readString(),
+      playerModel: try reader.readU8(),
       x: try reader.readFloat(),
       y: try reader.readFloat(),
       health: try reader.readU32(),
@@ -35,6 +37,7 @@ public struct Player: Codable, Sendable, BSATNSpecialDecodable, BSATNSpecialEnco
   public func encodeBSATN(to storage: inout BSATNStorage) throws {
     storage.appendU64(self.id)
     try storage.appendString(self.name)
+    storage.appendU8(self.playerModel)
     storage.appendFloat(self.x)
     storage.appendFloat(self.y)
     storage.appendU32(self.health)

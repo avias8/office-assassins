@@ -7,12 +7,17 @@ import AppKit
 #endif
 
 enum SurvivorsTheme {
-    static let accent = Color(red: 0.28, green: 0.58, blue: 0.98)
-    static let panelStroke = Color.white.opacity(0.16)
-    static let backdropTop = Color(red: 0.06, green: 0.08, blue: 0.16)
-    static let backdropBottom = Color(red: 0.10, green: 0.12, blue: 0.23)
-    static let backdropGlow = Color(red: 0.24, green: 0.45, blue: 0.95).opacity(0.26)
-    static let backdropGlowSecondary = Color(red: 0.10, green: 0.72, blue: 0.92).opacity(0.16)
+    static let accent = Color(red: 0.05, green: 0.81, blue: 0.73)
+    static let accentSecondary = Color(red: 0.98, green: 0.78, blue: 0.18)
+    static let danger = Color(red: 1.0, green: 0.33, blue: 0.36)
+    static let panelStroke = Color.white.opacity(0.20)
+    static let panelFill = Color(red: 0.04, green: 0.08, blue: 0.14).opacity(0.84)
+    static let backdropTop = Color(red: 0.03, green: 0.11, blue: 0.20)
+    static let backdropBottom = Color(red: 0.03, green: 0.06, blue: 0.11)
+    static let backdropGlow = Color(red: 0.04, green: 0.86, blue: 0.76).opacity(0.30)
+    static let backdropGlowSecondary = Color(red: 0.99, green: 0.63, blue: 0.22).opacity(0.18)
+    static let textPrimary = Color(red: 0.92, green: 0.96, blue: 1.0)
+    static let textMuted = Color(white: 0.62)
 }
 
 // MARK: - Shared UI Style
@@ -21,7 +26,7 @@ extension View {
     func pixelPanel() -> some View {
         background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(SurvivorsTheme.panelFill)
                 .overlay(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .strokeBorder(SurvivorsTheme.panelStroke, lineWidth: 1)
@@ -37,20 +42,28 @@ struct PixelButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 13, weight: .semibold, design: .rounded))
-            .padding(.horizontal, 14)
-            .padding(.vertical, 9)
+            .font(.custom("AvenirNextCondensed-DemiBold", size: 14))
+            .padding(.horizontal, 15)
+            .padding(.vertical, 10)
             .foregroundStyle(fgColor)
             .background {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(bgColor(configuration.isPressed))
+                    .overlay(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.16), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    )
             }
             .overlay {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(borderColor, lineWidth: 1)
             }
-            .shadow(color: Color.black.opacity(configuration.isPressed ? 0.04 : 0.10), radius: 4, x: 0, y: 1)
-            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
+            .shadow(color: Color.black.opacity(configuration.isPressed ? 0.10 : 0.26), radius: 8, x: 0, y: 3)
+            .scaleEffect(configuration.isPressed ? 0.978 : 1.0)
             .animation(.easeInOut(duration: 0.10), value: configuration.isPressed)
     }
 
@@ -59,32 +72,32 @@ struct PixelButtonStyle: ButtonStyle {
             return .white
         }
         if danger {
-            return Color(red: 1.0, green: 0.42, blue: 0.42)
+            return SurvivorsTheme.danger
         }
-        return filled ? .white : .primary
+        return filled ? Color(red: 0.02, green: 0.08, blue: 0.10) : SurvivorsTheme.textPrimary
     }
 
     private func bgColor(_ pressed: Bool) -> Color {
         if danger && filled {
-            return Color(red: 0.85, green: 0.20, blue: 0.22).opacity(pressed ? 0.82 : 0.96)
+            return SurvivorsTheme.danger.opacity(pressed ? 0.80 : 0.98)
         }
         if danger {
-            return Color(red: 0.85, green: 0.20, blue: 0.22).opacity(pressed ? 0.18 : 0.10)
+            return SurvivorsTheme.danger.opacity(pressed ? 0.22 : 0.12)
         }
         if filled {
-            return accentColor.opacity(pressed ? 0.82 : 0.95)
+            return accentColor.opacity(pressed ? 0.82 : 0.98)
         }
-        return Color.white.opacity(pressed ? 0.16 : 0.10)
+        return Color(red: 0.08, green: 0.14, blue: 0.22).opacity(pressed ? 0.70 : 0.56)
     }
 
     private var borderColor: Color {
         if danger {
-            return Color(red: 1.0, green: 0.42, blue: 0.42).opacity(0.75)
+            return SurvivorsTheme.danger.opacity(0.88)
         }
         if filled {
-            return accentColor.opacity(0.86)
+            return accentColor.opacity(0.94)
         }
-        return Color.white.opacity(0.24)
+        return Color.white.opacity(0.34)
     }
 }
 
@@ -195,7 +208,7 @@ struct SurvivorsBackdrop: View {
                         y += grid
                     }
 
-                    ctx.stroke(path, with: .color(Color.purple.opacity(0.12)), lineWidth: 1)
+                    ctx.stroke(path, with: .color(SurvivorsTheme.accent.opacity(0.16)), lineWidth: 1)
                 }
 
                 // Twinkling pixel stars
@@ -211,7 +224,7 @@ struct SurvivorsBackdrop: View {
                     }
                 }
 
-                // Purple ambient glow
+                // Teal ambient glow
                 RadialGradient(
                     colors: [SurvivorsTheme.backdropGlow, .clear],
                     center: UnitPoint(x: glowAX, y: glowAY),
@@ -220,7 +233,7 @@ struct SurvivorsBackdrop: View {
                 )
                 .blur(radius: 40)
 
-                // Crimson ambient glow
+                // Gold ambient glow
                 RadialGradient(
                     colors: [SurvivorsTheme.backdropGlowSecondary, .clear],
                     center: UnitPoint(x: glowBX, y: glowBY),
@@ -248,7 +261,7 @@ extension View {
 
 #if canImport(AppKit)
 @MainActor
-private final class NinjaGameAppDelegate: NSObject, NSApplicationDelegate {
+private final class OfficeAssassinsAppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         true
     }
@@ -265,9 +278,9 @@ private final class NinjaGameAppDelegate: NSObject, NSApplicationDelegate {
 // MARK: - Entry point
 
 @main
-struct NinjaGameApp: App {
+struct OfficeAssassinsApp: App {
     #if canImport(AppKit)
-    @NSApplicationDelegateAdaptor(NinjaGameAppDelegate.self) private var appDelegate
+    @NSApplicationDelegateAdaptor(OfficeAssassinsAppDelegate.self) private var appDelegate
     #endif
 
     init() {
@@ -277,7 +290,7 @@ struct NinjaGameApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("SpaceTimeDB Survivors") {
+        WindowGroup("Office Assassins") {
             RootView()
                 .frame(minWidth: 700, minHeight: 560)
         }
@@ -297,12 +310,12 @@ private enum Screen {
 // MARK: - Root View Model
 
 /// We need a global view model that connects on start, and lives across
-/// the Lobby and Playing screens, instead of tying it to NinjaGameView.
+/// the Lobby and Playing screens, instead of tying it to OfficeAssassinsView.
 @MainActor
 @Observable
 final class RootViewModel {
     let audio = MusicPlayer()
-    var gameVM = NinjaGameViewModel()
+    var gameVM = OfficeAssassinsViewModel()
 }
 
 // MARK: - Root view
@@ -374,7 +387,7 @@ struct RootView: View {
                 ))
 
             case .playing:
-                NinjaGameView(
+                OfficeAssassinsView(
                     isBackground: false,
                     isMuted: vm.audio.isMuted,
                     injectedVM: vm.gameVM,
@@ -445,7 +458,7 @@ struct RootView: View {
 
 struct TitleView: View {
     let titleOpacity: Double
-    var vm: NinjaGameViewModel
+    var vm: OfficeAssassinsViewModel
     let onBrowseLobbies: () -> Void
     let onQuickJoin: () -> Void
     @Binding var playerName: String
@@ -467,172 +480,51 @@ struct TitleView: View {
         }
     }
 
+    private var menuStatusText: String {
+        if isConnecting { return "CONNECTING" }
+        if vm.isConnected { return "LIVE" }
+        return vm.connectionDetail.isEmpty ? "READY" : "OFFLINE"
+    }
+
+    private var menuStatusColor: Color {
+        if isConnecting { return SurvivorsTheme.accentSecondary }
+        if vm.isConnected { return SurvivorsTheme.accent }
+        return vm.connectionDetail.isEmpty ? SurvivorsTheme.textMuted : SurvivorsTheme.danger
+    }
+
     var body: some View {
         GeometryReader { geo in
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    Spacer(minLength: 20)
+                let compact = geo.size.width < 980
+                VStack(spacing: 16) {
+                    headerBar
 
-                    // ── Title ──
-                    VStack(spacing: 8) {
-                        let logoSize = min(geo.size.width * 0.28, 180.0)
-                        Image("spacetime_logo", bundle: .module)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: logoSize, height: logoSize)
-                            .shadow(color: .black.opacity(0.18), radius: 6, x: 0, y: 3)
-
-                        Text("Ninja Wars")
-                            .font(.system(size: 42, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color(red: 0.90, green: 0.95, blue: 1.0))
-                            .shadow(color: Color(red: 0.2, green: 0.4, blue: 0.8).opacity(0.45), radius: 8, x: 0, y: 2)
-
-                        Text("Realtime multiplayer on SpacetimeDB")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundStyle(Color(white: 0.72))
-                            .padding(.top, 8)
-                    }
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.5)
-                    .opacity(titleOpacity)
-                    .padding(.bottom, 44)
-
-                    // ── Controls ──
-                    VStack(spacing: 14) {
-                        // Name input
-                        TextField("Enter your ninja name…", text: $playerName)
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 14)
-                            .background(Color.white.opacity(0.06))
-                            .overlay(Rectangle().strokeBorder(Color(red: 0.55, green: 0.82, blue: 1.0).opacity(0.40), lineWidth: 2))
-                            .onSubmit {
-                                guard canStart else { return }
-                                SoundEffects.shared.play(.buttonPress)
-                                onQuickJoin()
-                            }
-
-                        // Environment picker toggle
-                        HStack(spacing: 0) {
-                            ForEach(SpacetimeEnvironment.allCases) { env in
-                                let isSelected = selectedEnvironment == env
-                                Button {
-                                    SoundEffects.shared.play(.buttonPress)
-                                    selectedEnvironment = env
-                                } label: {
-                                    Text(env.rawValue)
-                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 8)
-                                        .foregroundColor(isSelected ? .white : Color(white: 0.85))
-                                        .background(isSelected ? SurvivorsTheme.accent.opacity(0.92) : Color.clear)
-                                }
-                                .buttonStyle(.plain)
-                            }
+                    if compact {
+                        VStack(spacing: 14) {
+                            heroPanel(height: min(330, geo.size.height * 0.34), compact: true)
+                            modeRail(compact: true)
+                            commandPanel
                         }
-                        .background(Color.white.opacity(0.08))
-                        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Color.white.opacity(0.22), lineWidth: 1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .padding(.horizontal, 48)
-
-                        Text(endpointLabel)
-                            .font(.system(size: 10, weight: .medium, design: .rounded))
-                            .foregroundStyle(Color(white: 0.62))
-                            .padding(.top, -6)
-
-                        // ── PLAY NOW ──
-                        Button {
-                            guard canStart, !isConnecting else { return }
-                            SoundEffects.shared.play(.buttonPress)
-                            isConnecting = true
-                            onQuickJoin()
-                        } label: {
-                            HStack(spacing: 8) {
-                                if isConnecting {
-                                    ProgressView().controlSize(.small).tint(.black)
-                                    Text("Connecting...")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                } else {
-                                    Image(systemName: "star.fill")
-                                    Text("Quick Play")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                }
+                    } else {
+                        HStack(alignment: .top, spacing: 14) {
+                            VStack(spacing: 14) {
+                                heroPanel(height: min(325, geo.size.height * 0.35), compact: false)
+                                modeRail(compact: false)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 6)
+                            commandPanel
+                                .frame(width: 360)
                         }
-                        .buttonStyle(PixelButtonStyle(filled: true))
-                        .disabled(!canStart || isConnecting)
-                        .opacity(canStart ? 1.0 : 0.4)
-                        .keyboardShortcut(.defaultAction)
-                        .padding(.top, 4)
-
-                        if isConnecting && !vm.connectionDetail.isEmpty {
-                            Text(vm.connectionDetail)
-                                .font(.system(size: 11, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.80))
-                                .padding(.top, -6)
-                        }
-
-                        if isConnecting {
-                            Button("Cancel") {
-                                SoundEffects.shared.play(.buttonPress)
-                                isConnecting = false
-                                vm.stop()
-                            }
-                            .buttonStyle(PixelButtonStyle())
-                            .padding(.bottom, 6)
-                        }
-
-                        // ── Browse Lobbies ──
-                        Button {
-                            SoundEffects.shared.play(.buttonPress)
-                            onBrowseLobbies()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "person.3.fill")
-                                Text("Browse Lobbies")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(PixelButtonStyle())
-                        .disabled(!canStart || isConnecting)
-                        .opacity(canStart && !isConnecting ? 1.0 : 0.4)
-
-                        // ── Utility row ──
-                        HStack(spacing: 14) {
-                            Button(action: clearServer) {
-                                Text("Clear Server")
-                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.red.opacity(0.8))
-                            }
-                            .buttonStyle(.plain)
-
-                            Text("·").foregroundColor(Color(white: 0.25))
-
-                            Button(action: quitApplication) {
-                                Text("Quit")
-                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(white: 0.45))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.top, 6)
                     }
-                    .frame(width: 380)
-                    .opacity(titleOpacity)
-                    .padding(.bottom, 32)
 
-                    Text("Realtime multiplayer powered by SpacetimeDB")
-                        .font(.system(size: 11, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.35))
-
-                    Spacer(minLength: 20)
+                    footerRail
                 }
+                .padding(.horizontal, compact ? 14 : 20)
+                .padding(.vertical, 18)
+                .padding(.bottom, 18)
+                .frame(maxWidth: 1180, minHeight: geo.size.height, alignment: .top)
                 .frame(maxWidth: .infinity, minHeight: geo.size.height, alignment: .center)
+                .opacity(titleOpacity)
             }
         }
         .onAppear {
@@ -640,6 +532,345 @@ struct TitleView: View {
                 pulsePlay = true
             }
         }
+    }
+
+    private var headerBar: some View {
+        HStack(spacing: 8) {
+            Text("SEASON 01")
+                .font(.custom("AvenirNextCondensed-Heavy", size: 11))
+                .foregroundStyle(Color.black.opacity(0.85))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(SurvivorsTheme.accentSecondary)
+                .clipShape(Capsule(style: .continuous))
+            Text("EVENT: NIGHT SHIFT")
+                .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
+                .foregroundStyle(SurvivorsTheme.textMuted)
+            Spacer()
+            Text(menuStatusText)
+                .font(.custom("AvenirNextCondensed-Heavy", size: 11))
+                .foregroundStyle(menuStatusColor)
+        }
+        .padding(.horizontal, 4)
+        .padding(.top, 8)
+    }
+
+    @ViewBuilder
+    private func heroPanel(height: CGFloat, compact: Bool) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.01, green: 0.14, blue: 0.21),
+                            Color(red: 0.04, green: 0.07, blue: 0.12)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(SurvivorsTheme.accent.opacity(0.44), lineWidth: 1.5)
+                )
+
+            Circle()
+                .fill(SurvivorsTheme.accent.opacity(0.26))
+                .frame(width: compact ? 240 : 360, height: compact ? 240 : 360)
+                .blur(radius: 24)
+                .offset(x: compact ? 110 : 180, y: -40)
+                .scaleEffect(pulsePlay ? 1.06 : 0.92)
+                .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: pulsePlay)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Office Assassins")
+                    .font(.custom("AvenirNextCondensed-Heavy", size: compact ? 42 : 52))
+                    .foregroundStyle(SurvivorsTheme.textPrimary)
+                    .lineLimit(1)
+
+                Text("Assemble your office crew. Queue. Clash. Cash out.")
+                    .font(.custom("AvenirNextCondensed-Medium", size: compact ? 13 : 15))
+                    .foregroundStyle(SurvivorsTheme.textMuted)
+
+                HStack(spacing: 8) {
+                    statusTag("Daily Reward Ready", icon: "gift.fill", tint: SurvivorsTheme.accentSecondary)
+                    statusTag("Pass XP x1.5", icon: "bolt.fill", tint: SurvivorsTheme.accent)
+                }
+
+                HStack(spacing: 10) {
+                    infoTile(title: "Featured", value: "Cubicle Clash")
+                    infoTile(title: "Queue", value: "Fast Match")
+                    infoTile(title: "Players", value: "\(max(1, vm.players.count)) online")
+                }
+            }
+            .padding(18)
+        }
+        .frame(height: height)
+    }
+
+    @ViewBuilder
+    private func modeRail(compact: Bool) -> some View {
+        let columns = compact
+            ? [GridItem(.flexible())]
+            : [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+
+        LazyVGrid(columns: columns, spacing: 10) {
+            modeCard(
+                title: "Ranked Sprint",
+                subtitle: "Tight arenas · high stakes",
+                reward: "+250 Pass XP",
+                tint: SurvivorsTheme.accent
+            )
+            modeCard(
+                title: "Casual Scramble",
+                subtitle: "Warm-up and test loadouts",
+                reward: "Daily Bonus Ready",
+                tint: SurvivorsTheme.accentSecondary
+            )
+            modeCard(
+                title: "Custom Lobby",
+                subtitle: "Invite friends and bots",
+                reward: "Private Room",
+                tint: Color(red: 0.74, green: 0.72, blue: 1.0)
+            )
+        }
+    }
+
+    private var commandPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Command Center")
+                .font(.custom("AvenirNextCondensed-Heavy", size: 24))
+                .foregroundStyle(SurvivorsTheme.textPrimary)
+
+            TextField("Enter your codename…", text: $playerName)
+                .textFieldStyle(.plain)
+                .font(.custom("AvenirNextCondensed-DemiBold", size: 18))
+                .foregroundColor(SurvivorsTheme.textPrimary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(Color.white.opacity(0.07))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(SurvivorsTheme.accent.opacity(0.42), lineWidth: 1.5)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .onSubmit {
+                    guard canStart else { return }
+                    SoundEffects.shared.play(.buttonPress)
+                    onQuickJoin()
+                }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Character")
+                    .font(.custom("AvenirNextCondensed-DemiBold", size: 12))
+                    .foregroundStyle(SurvivorsTheme.textMuted)
+
+                HStack(spacing: 8) {
+                    ForEach(OfficeAssassinsViewModel.PlayerModel.allCases) { model in
+                        let isSelected = vm.selectedPlayerModel == model
+                        Button {
+                            SoundEffects.shared.play(.buttonPress)
+                            vm.selectPlayerModel(model)
+                        } label: {
+                            VStack(spacing: 3) {
+                                Image(systemName: model.icon)
+                                    .font(.system(size: 13, weight: .semibold))
+                                Text(model.label)
+                                    .font(.custom("AvenirNextCondensed-DemiBold", size: 12))
+                                Text(model == .ninja ? "Classic" : "Lite")
+                                    .font(.custom("AvenirNextCondensed-Medium", size: 10))
+                            }
+                            .foregroundStyle(isSelected ? Color.black.opacity(0.85) : SurvivorsTheme.textPrimary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(isSelected ? SurvivorsTheme.accent : Color.white.opacity(0.06))
+                        }
+                        .buttonStyle(.plain)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .strokeBorder(isSelected ? SurvivorsTheme.accent.opacity(0.95) : Color.white.opacity(0.24), lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .accessibilityLabel("Character \(model.label)")
+                        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+                    }
+                }
+            }
+
+            HStack(spacing: 0) {
+                ForEach(SpacetimeEnvironment.allCases) { env in
+                    let isSelected = selectedEnvironment == env
+                    Button {
+                        SoundEffects.shared.play(.buttonPress)
+                        selectedEnvironment = env
+                    } label: {
+                        Text(env.rawValue)
+                            .font(.custom("AvenirNextCondensed-DemiBold", size: 13))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 9)
+                            .foregroundStyle(isSelected ? Color.black.opacity(0.85) : SurvivorsTheme.textMuted)
+                            .background(isSelected ? SurvivorsTheme.accent : .clear)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .background(Color.white.opacity(0.06))
+            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Color.white.opacity(0.22), lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            Text("Gateway: \(endpointLabel)")
+                .font(.custom("AvenirNextCondensed-Medium", size: 11))
+                .foregroundStyle(SurvivorsTheme.textMuted)
+
+            Button {
+                guard canStart, !isConnecting else { return }
+                SoundEffects.shared.play(.buttonPress)
+                isConnecting = true
+                onQuickJoin()
+            } label: {
+                HStack(spacing: 8) {
+                    if isConnecting {
+                        ProgressView().controlSize(.small).tint(.black)
+                        Text("Connecting...")
+                            .font(.custom("AvenirNextCondensed-Heavy", size: 18))
+                    } else {
+                        Image(systemName: "play.fill")
+                        Text("Quick Deploy")
+                            .font(.custom("AvenirNextCondensed-Heavy", size: 18))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+            }
+            .buttonStyle(PixelButtonStyle(filled: true))
+            .disabled(!canStart || isConnecting)
+            .opacity(canStart ? 1.0 : 0.45)
+            .keyboardShortcut(.defaultAction)
+
+            Button {
+                SoundEffects.shared.play(.buttonPress)
+                onBrowseLobbies()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "person.3.fill")
+                    Text("Squad Browser")
+                        .font(.custom("AvenirNextCondensed-DemiBold", size: 15))
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PixelButtonStyle())
+            .disabled(!canStart || isConnecting)
+            .opacity(canStart && !isConnecting ? 1.0 : 0.45)
+
+            if isConnecting {
+                if !vm.connectionDetail.isEmpty {
+                    Text(vm.connectionDetail)
+                        .font(.custom("AvenirNextCondensed-Medium", size: 11))
+                        .foregroundStyle(.white.opacity(0.80))
+                }
+                Button("Cancel") {
+                    SoundEffects.shared.play(.buttonPress)
+                    isConnecting = false
+                    vm.stop()
+                }
+                .buttonStyle(PixelButtonStyle())
+            }
+
+            Rectangle()
+                .fill(Color.white.opacity(0.10))
+                .frame(height: 1)
+                .padding(.top, 2)
+
+            HStack(spacing: 14) {
+                Button(action: clearServer) {
+                    Text("Reset Realm")
+                        .font(.custom("AvenirNextCondensed-DemiBold", size: 12))
+                        .foregroundStyle(SurvivorsTheme.danger.opacity(0.9))
+                }
+                .buttonStyle(.plain)
+                Button(action: quitApplication) {
+                    Text("Exit")
+                        .font(.custom("AvenirNextCondensed-DemiBold", size: 12))
+                        .foregroundStyle(SurvivorsTheme.textMuted)
+                }
+                .buttonStyle(.plain)
+                Spacer()
+            }
+        }
+        .padding(16)
+        .pixelPanel()
+    }
+
+    private var footerRail: some View {
+        HStack(alignment: .center) {
+            Text("Free-to-play prototype: live matchmaking, instant sessions, fast rematches.")
+                .font(.custom("AvenirNextCondensed-Medium", size: 12))
+                .foregroundStyle(.white.opacity(0.42))
+            Spacer()
+            Text("Gateway: \(endpointLabel)")
+                .font(.custom("AvenirNextCondensed-Medium", size: 11))
+                .foregroundStyle(SurvivorsTheme.textMuted)
+        }
+        .padding(.horizontal, 10)
+    }
+
+    private func statusTag(_ text: String, icon: String, tint: Color) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+            Text(text)
+        }
+        .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
+        .foregroundStyle(tint)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color.black.opacity(0.24))
+        .overlay(Capsule(style: .continuous).strokeBorder(tint.opacity(0.55), lineWidth: 1))
+        .clipShape(Capsule(style: .continuous))
+    }
+
+    private func infoTile(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(title.uppercased())
+                .font(.custom("AvenirNextCondensed-Medium", size: 10))
+                .foregroundStyle(SurvivorsTheme.textMuted.opacity(0.85))
+            Text(value)
+                .font(.custom("AvenirNextCondensed-DemiBold", size: 12))
+                .foregroundStyle(SurvivorsTheme.textPrimary)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(0.06))
+        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Color.white.opacity(0.20), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private func modeCard(title: String, subtitle: String, reward: String, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(title)
+                    .font(.custom("AvenirNextCondensed-Heavy", size: 16))
+                    .foregroundStyle(SurvivorsTheme.textPrimary)
+                Spacer()
+                Circle()
+                    .fill(tint.opacity(0.95))
+                    .frame(width: 9, height: 9)
+            }
+            Text(subtitle)
+                .font(.custom("AvenirNextCondensed-Medium", size: 12))
+                .foregroundStyle(SurvivorsTheme.textMuted)
+            Text(reward.uppercased())
+                .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
+                .foregroundStyle(tint)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(tint.opacity(0.12))
+                .clipShape(Capsule(style: .continuous))
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.04))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.white.opacity(0.22), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private func quitApplication() {
@@ -659,7 +890,7 @@ struct TitleView: View {
 // MARK: - Lobby Browser Screen
 
 struct LobbyBrowserView: View {
-    let vm: NinjaGameViewModel
+    let vm: OfficeAssassinsViewModel
     let onAction: (ExitAction) -> Void
     
     @State private var newLobbyName: String = ""
@@ -670,9 +901,9 @@ struct LobbyBrowserView: View {
             VStack(spacing: 24) {
                 HStack(alignment: .bottom) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Lobbies")
-                            .font(.system(size: 26, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
+                        Text("Squad Browser")
+                            .font(.custom("AvenirNextCondensed-Heavy", size: 34))
+                            .foregroundStyle(SurvivorsTheme.textPrimary)
 
                         HStack(spacing: 6) {
                             Rectangle()
@@ -681,7 +912,7 @@ struct LobbyBrowserView: View {
                             Text(vm.isConnected
                                  ? "Online · \(vm.myPlayer?.name ?? "Joining...")"
                                  : (vm.connectionDetail.isEmpty ? "Connecting..." : vm.connectionDetail))
-                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .font(.custom("AvenirNextCondensed-Medium", size: 12))
                                 .foregroundStyle(vm.isConnected ? Color(white: 0.65) : .orange)
                         }
                     }
@@ -739,12 +970,12 @@ struct LobbyBrowserView: View {
 
                 VStack(spacing: 0) {
                     HStack {
-                        Text("Available Lobbies")
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        Text("Available Squads")
+                            .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
                             .foregroundStyle(Color(white: 0.40))
                         Spacer()
                         Text("\(vm.lobbies.count) / 50")
-                            .font(.system(size: 10, weight: .medium, design: .rounded).monospacedDigit())
+                            .font(.custom("AvenirNextCondensed-Medium", size: 11).monospacedDigit())
                             .foregroundStyle(Color(white: 0.30))
                     }
                     .padding(.horizontal, 4)
@@ -766,20 +997,20 @@ struct LobbyBrowserView: View {
                             } else {
                                 ForEach(vm.lobbies, id: \.id) { lobby in
                                     let lobbyPlayerCount = vm.playerCount(forLobbyId: lobby.id)
-                                    let isFull = lobbyPlayerCount >= NinjaGameViewModel.maxPlayersPerLobby
+                                    let isFull = lobbyPlayerCount >= OfficeAssassinsViewModel.maxPlayersPerLobby
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(lobby.name)
-                                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                                .font(.custom("AvenirNextCondensed-DemiBold", size: 15))
                                                 .foregroundStyle(.white)
 
                                             HStack(spacing: 10) {
                                                 Text(lobby.isPlaying ? "Playing" : "Waiting")
                                                     .foregroundStyle(lobby.isPlaying ? .orange : .green)
-                                                Text("\(lobbyPlayerCount)/\(NinjaGameViewModel.maxPlayersPerLobby)")
+                                                Text("\(lobbyPlayerCount)/\(OfficeAssassinsViewModel.maxPlayersPerLobby)")
                                                     .foregroundStyle(isFull ? .red : Color(white: 0.50))
                                             }
-                                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                                            .font(.custom("AvenirNextCondensed-Medium", size: 12))
                                         }
                                         Spacer()
                                         Button(isFull ? "Full" : "Join") {
@@ -810,7 +1041,7 @@ struct LobbyBrowserView: View {
                             }) {
                                 HStack(spacing: 6) {
                                     Image(systemName: "star.fill")
-                                    Text("Quick Join")
+                                    Text("Quick Deploy")
                                 }
                                 .frame(maxWidth: .infinity)
                             }
@@ -837,10 +1068,10 @@ struct LobbyBrowserView: View {
                         }
 
                         if vm.isConnected && !vm.hasJoined {
-                            Text("Waiting for player registration. Try Quick Join or Create.")
-                                .font(.system(size: 9, weight: .medium, design: .rounded))
-                                .foregroundStyle(Color(white: 0.38))
-                                .frame(maxWidth: .infinity, alignment: .center)
+                                Text("Waiting for player registration. Try Quick Deploy or Create.")
+                                    .font(.custom("AvenirNextCondensed-Medium", size: 10))
+                                    .foregroundStyle(Color(white: 0.38))
+                                    .frame(maxWidth: .infinity, alignment: .center)
                         }
                     }
 
@@ -866,7 +1097,7 @@ struct LobbyBrowserView: View {
 }
 
 struct LobbyView: View {
-    let vm: NinjaGameViewModel
+    let vm: OfficeAssassinsViewModel
     let onAction: (ExitAction) -> Void
     
     var currentLobby: Lobby? {
@@ -902,7 +1133,7 @@ struct LobbyView: View {
     }
 
     var openSlots: Int {
-        max(0, NinjaGameViewModel.maxPlayersPerLobby - lobbyPlayerCount)
+        max(0, OfficeAssassinsViewModel.maxPlayersPerLobby - lobbyPlayerCount)
     }
 
     var lobbyStatusText: String {
@@ -921,16 +1152,16 @@ struct LobbyView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 22) {
-                Text("Lobby")
-                    .font(.system(size: 26, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+                Text("Pre-Match Room")
+                    .font(.custom("AvenirNextCondensed-Heavy", size: 34))
+                    .foregroundStyle(SurvivorsTheme.textPrimary)
 
                 HStack(spacing: 6) {
                     Rectangle()
                         .fill(vm.isConnected ? Color.green : Color.red)
                         .frame(width: 8, height: 8)
                     Text(vm.isConnected ? "CONNECTED" : "DISCONNECTED")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.custom("AvenirNextCondensed-DemiBold", size: 12))
                         .foregroundStyle(vm.isConnected ? Color(white: 0.60) : .red)
                 }
 
@@ -943,7 +1174,7 @@ struct LobbyView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text(currentLobby?.name ?? "Unknown lobby")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .font(.custom("AvenirNextCondensed-DemiBold", size: 16))
                             .foregroundStyle(.white)
                         Spacer()
                         Text(lobbyStatusText)
@@ -954,11 +1185,11 @@ struct LobbyView: View {
                     HStack(spacing: 8) {
                         Text("ID #\(currentLobby?.id ?? 0)")
                         Text("·")
-                        Text("\(lobbyPlayerCount)/\(NinjaGameViewModel.maxPlayersPerLobby) players")
+                        Text("\(lobbyPlayerCount)/\(OfficeAssassinsViewModel.maxPlayersPerLobby) players")
                         Text("·")
                         Text("\(readyHumanCount)/\(max(1, humanPlayerCount)) ready")
                     }
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .font(.custom("AvenirNextCondensed-Medium", size: 11))
                     .foregroundStyle(Color(white: 0.48))
 
                     HStack {
@@ -966,7 +1197,7 @@ struct LobbyView: View {
                         if botCount > 0 { Text("· \(botCount) bots") }
                         Spacer()
                     }
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .font(.custom("AvenirNextCondensed-Medium", size: 11))
                     .foregroundStyle(Color(white: 0.32))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -977,8 +1208,8 @@ struct LobbyView: View {
                 // Player list
                 VStack(spacing: 6) {
                     HStack {
-                        Text("Players")
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        Text("Operatives")
+                            .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
                             .foregroundStyle(Color(white: 0.38))
                         Spacer()
                     }
@@ -986,11 +1217,11 @@ struct LobbyView: View {
                     ForEach(lobbyPlayers, id: \.id) { player in
                         HStack {
                             Text((player.id == vm.userId ? "● " : "  ") + player.name)
-                                .font(.system(size: 13, weight: player.id == vm.userId ? .semibold : .medium, design: .rounded))
+                                .font(.custom("AvenirNextCondensed-DemiBold", size: 14))
                                 .foregroundStyle(player.id == vm.userId ? .white : Color(white: 0.72))
                             Spacer()
                             Text(player.isReady ? "Ready" : "Waiting")
-                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .font(.custom("AvenirNextCondensed-Medium", size: 12))
                                 .foregroundStyle(player.isReady ? .green : Color(white: 0.32))
                         }
                         .padding(.vertical, 7)
@@ -1017,7 +1248,7 @@ struct LobbyView: View {
 
                 VStack(spacing: 8) {
                     Text("Match controls")
-                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .font(.custom("AvenirNextCondensed-DemiBold", size: 11))
                         .foregroundStyle(Color(white: 0.35))
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -1027,7 +1258,7 @@ struct LobbyView: View {
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: myPlayerIsReady ? "xmark" : "checkmark")
-                            Text(myPlayerIsReady ? "Not Ready" : "Ready Up")
+                            Text(myPlayerIsReady ? "Stand Down" : "Ready Up")
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -1041,7 +1272,7 @@ struct LobbyView: View {
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "play.fill")
-                            Text("Start Match")
+                            Text("Launch Match")
                         }
                         .frame(maxWidth: .infinity)
                     }

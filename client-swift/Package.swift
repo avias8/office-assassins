@@ -2,15 +2,19 @@
 import PackageDescription
 
 let package = Package(
-    name: "NinjaGameClient",
+    name: "OfficeAssassinsClient",
     platforms: [
         .macOS(.v15),
         .iOS(.v17)
     ],
     products: [
         .executable(
-            name: "NinjaGameClient",
-            targets: ["NinjaGameClient"]
+            name: "OfficeAssassinsClient",
+            targets: ["OfficeAssassinsClient"]
+        ),
+        .executable(
+            name: "SoakRunner",
+            targets: ["SoakRunner"]
         )
     ],
     dependencies: [
@@ -18,12 +22,18 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "NinjaGameClient",
+            name: "OfficeAssassinsClient",
             dependencies: [
                 .product(name: "SpacetimeDB", package: "spacetimedb-swift")
             ],
             resources: [
                 .process("Resources")
+            ]
+        ),
+        .executableTarget(
+            name: "SoakRunner",
+            dependencies: [
+                .product(name: "SpacetimeDB", package: "spacetimedb-swift")
             ]
         )
     ]
