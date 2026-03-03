@@ -520,6 +520,7 @@ public struct OfficeAssassinsView: View {
                             .labelStyle(.iconOnly)
                             .frame(width: 28, height: 28)
                             .background(Color.white.opacity(0.08))
+                            .contentShape(Rectangle())
                             .overlay(Rectangle().strokeBorder(Color(white: 0.28), lineWidth: 1))
                     }
                     .buttonStyle(.plain)

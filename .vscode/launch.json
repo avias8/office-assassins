@@ -1,0 +1,44 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:office-assassins}/client-swift",
+            "name": "Debug OfficeAssassinsClient (client-swift)",
+            "target": "OfficeAssassinsClient",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug OfficeAssassinsClient (client-swift)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:office-assassins}/client-swift",
+            "name": "Release OfficeAssassinsClient (client-swift)",
+            "target": "OfficeAssassinsClient",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release OfficeAssassinsClient (client-swift)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:office-assassins}/client-swift",
+            "name": "Debug SoakRunner (client-swift)",
+            "target": "SoakRunner",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug SoakRunner (client-swift)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:office-assassins}/client-swift",
+            "name": "Release SoakRunner (client-swift)",
+            "target": "SoakRunner",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release SoakRunner (client-swift)"
+        }
+    ]
+}
